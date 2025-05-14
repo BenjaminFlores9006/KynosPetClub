@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vPagos"
+             Title="Pagos"
+             BackgroundColor="#F5F9F9">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Encabezado -->
+            <Label Text="Resumen de Pago"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="#4B8A8B"
+                   HorizontalOptions="Center" />
+
+            <!-- Nombre completo -->
+            <Label Text="Nombre completo" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Label Text="{Binding NombreCompleto}" TextColor="Black" FontSize="16" />
+
+            <!-- Dirección -->
+            <Label Text="Dirección" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Label Text="{Binding Direccion}" TextColor="Black" FontSize="16" />
+
+            <!-- Cédula -->
+            <Label Text="Cédula" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Label Text="{Binding Cedula}" TextColor="Black" FontSize="16" />
+
+            <!-- Fecha del servicio -->
+            <Label Text="Fecha del servicio" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Label Text="{Binding Fecha}" TextColor="Black" FontSize="16" />
+
+            <!-- Hora del servicio -->
+            <Label Text="Hora del servicio" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Label Text="{Binding Hora}" TextColor="Black" FontSize="16" />
+
+            <!-- Servicio + Descripción + Imagen + Mascota Picker -->
+            <Label Text="Servicio" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Frame BorderColor="#A3C939"
+                   CornerRadius="10"
+                   Padding="10"
+                   BackgroundColor="White">
+                <Grid ColumnDefinitions="100, *" RowDefinitions="Auto, Auto, Auto, Auto" ColumnSpacing="15">
+
+                    <!-- Imagen del servicio -->
+                    <Image Grid.RowSpan="4"
+                           Source="{Binding ImagenServicio}" 
+                           Aspect="AspectFill"
+                           HeightRequest="80"
+                           WidthRequest="80"
+                           BackgroundColor="#F5F5F5" />
+
+                    <!-- Nombre del servicio -->
+                    <Label Grid.Column="1"
+                           Text="{Binding NombreServicio}"
+                           FontAttributes="Bold"
+                           TextColor="#4B8A8B"
+                           FontSize="16" />
+
+                    <!-- Descripción -->
+                    <Label Grid.Column="1" Grid.Row="1"
+                           Text="{Binding DescripcionServicio}"
+                           TextColor="Black"
+                           FontSize="14" />
+
+                    <!-- Label de mascota -->
+                    <Label Grid.Column="1" Grid.Row="2"
+                           Text="Mascota"
+                           TextColor="#4B8A8B"
+                           FontAttributes="Bold" />
+
+                    <!-- Mascota Picker -->
+                    <Picker Grid.Column="1" Grid.Row="3"
+                            Title="Selecciona mascota"
+                            ItemsSource="{Binding MascotasDisponibles}"
+                            SelectedItem="{Binding MascotaSeleccionada}"
+                            BackgroundColor="#F0F0F0"
+                            TitleColor="Gray"
+                            TextColor="Black" />
+                </Grid>
+            </Frame>
+
+            <!-- Total -->
+            <Label Text="Total a pagar" TextColor="#4B8A8B" FontAttributes="Bold" />
+            <Label Text="{Binding Total}"
+                   TextColor="Black"
+                   FontAttributes="Bold"
+                   FontSize="18" />
+
+            <!-- Botón Pagar -->
+            <Button Text="Pagar"
+                    BackgroundColor="#FFD33C"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    HeightRequest="50"
+                    Command="{Binding PagarCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
