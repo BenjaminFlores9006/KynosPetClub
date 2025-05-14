@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vHistorial"
+             Title="Historial">
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="15">
+
+                <!-- Título -->
+                <Label Text="Historial"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       HorizontalOptions="Center"/>
+
+                <!-- Filtros -->
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                    <Button Text="Todos"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="20"
+                            Padding="20,5"/>
+                    <Button Text="Completados"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="20"
+                            Padding="20,5"/>
+                    <Button Text="Cancelados"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="20"
+                            Padding="20,5"/>
+                </HorizontalStackLayout>
+
+                <!-- Lista de historial -->
+                <VerticalStackLayout Spacing="10">
+                    <!-- Item 1 -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                        <Label Text="Guardería Canina"
+                               Grid.Column="0"
+                               Grid.Row="0"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+                        <Label Text="Listo"
+                               Grid.Column="1"
+                               Grid.Row="0"
+                               TextColor="Green"
+                               FontAttributes="Bold"/>
+                        <Label Text="12 de Abril de 2024"
+                               Grid.Column="0"
+                               Grid.Row="1"
+                               TextColor="Gray"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="LightGray" HorizontalOptions="Fill"/>
+
+                    <!-- Item 2 -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                        <Label Text="Veterinaria"
+                               Grid.Column="0"
+                               Grid.Row="0"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+                        <Label Text="Listo"
+                               Grid.Column="1"
+                               Grid.Row="0"
+                               TextColor="Green"
+                               FontAttributes="Bold"/>
+                        <Label Text="17 de Marzo de 2024"
+                               Grid.Column="0"
+                               Grid.Row="1"
+                               TextColor="Gray"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="LightGray" HorizontalOptions="Fill"/>
+
+                    <!-- Item 3 -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <Label Text="Baño"
+                               Grid.Column="0"
+                               Grid.Row="0"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+                        <Label Text="Listo"
+                               Grid.Column="1"
+                               Grid.Row="0"
+                               TextColor="Green"
+                               FontAttributes="Bold"/>
+                        <Label Text="10 de Febrero de 2024"
+                               Grid.Column="0"
+                               Grid.Row="1"
+                               TextColor="Gray"/>
+                        <Label Text="Excelente servicio!!!"
+                               Grid.Column="0"
+                               Grid.Row="2"
+                               FontAttributes="Italic"
+                               TextColor="Gray"/>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Color="LightGray" HorizontalOptions="Fill"/>
+
+                    <!-- Item 4 -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                        <Label Text="Peluquería"
+                               Grid.Column="0"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+                        <Label Text="Cancelado"
+                               Grid.Column="1"
+                               TextColor="Red"
+                               FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>
