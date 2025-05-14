@@ -14,6 +14,9 @@
                    FontAttributes="Bold"
                    TextColor="#4B8A8B"
                    HorizontalOptions="Center" />
+            <Image Source="kynos_logo.png"
+                   HorizontalOptions="Center"
+                   HeightRequest="100" />
 
             <!-- Nombre completo -->
             <Label Text="Nombre completo" TextColor="#4B8A8B" FontAttributes="Bold" />
