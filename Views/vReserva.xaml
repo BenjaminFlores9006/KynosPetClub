@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vReserva"
+             BackgroundColor="White"
+             Title="Reservas">
+
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="15">
+
+                
+                <Label Text="Reservas"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"/>
+
+             
+                <Frame Padding="0" HasShadow="False" CornerRadius="10" BorderColor="LightGray">
+                    <Image Source="veterinaria.jpg"
+                           Aspect="AspectFill"
+                           HeightRequest="150"/>
+                </Frame>
+
+           
+                <Label Text="Veterinaria"
+                       FontSize="16"
+                       FontAttributes="Bold"/>
+                <Label Text="$35 / Valor a cancelar"
+                       FontSize="14"
+                       TextColor="Gray"/>
+
+    
+                <HorizontalStackLayout Spacing="10">
+                    <Button Text="Jun 10, 2024"
+                            BackgroundColor="#E1F5FE"
+                            TextColor="Black"
+                            CornerRadius="5"/>
+                    <Button Text="9:41 AM"
+                            BackgroundColor="#E1F5FE"
+                            TextColor="Black"
+                            CornerRadius="5"/>
+                </HorizontalStackLayout>
+
+
+                <Button Text="Agendar cita"
+                        BackgroundColor="#FFC107"
+                        TextColor="Black"
+                        CornerRadius="5"
+                        HeightRequest="50"
+                        Margin="0,30,0,0"/>
+            </VerticalStackLayout>
+        </ScrollView>
+
+
+        <Grid BackgroundColor="#A6E3E9"
+              Padding="10"
+              RowSpacing="0"
+              ColumnSpacing="20"
+              Grid.Row="1"
+              ColumnDefinitions="*,*,*,*,*">
+
+            <ImageButton Source="home.png" BackgroundColor="Transparent"/>
+            <ImageButton Source="calendar.png" BackgroundColor="Transparent"/>
+            <ImageButton Source="shop.png" BackgroundColor="Transparent"/>
+            <ImageButton Source="heart.png" BackgroundColor="Transparent"/>
+            <ImageButton Source="user.png" BackgroundColor="Transparent"/>
+        </Grid>
+    </Grid>
+</ContentPage>
