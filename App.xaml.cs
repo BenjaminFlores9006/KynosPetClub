@@ -9,7 +9,7 @@
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new Views.vPagos());
+            return new Window(new Views.vLogIn());
         }
     }
 }

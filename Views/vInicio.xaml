@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vInicio"
+             Title="vInicio">
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto,*,Auto">
+            <ScrollView>
+                <VerticalStackLayout Padding="20" Spacing="15">
+
+                    <Frame BackgroundColor="#9EFFAC" Padding="10" CornerRadius="10" HasShadow="False">
+                        <Label Text="Hola, Benjamín"
+                               FontSize="16"
+                               TextColor="Black"
+                               FontAttributes="Bold" />
+                    </Frame>
+
+                    <HorizontalStackLayout HorizontalOptions="CenterAndExpand" Spacing="10">
+                        <Button Text="📜 Historial"
+                                BackgroundColor="#F7F7F7"
+                                TextColor="Black"
+                                CornerRadius="10"/>
+                        <Button Text="📍 Seguimiento"
+                                BackgroundColor="#F7F7F7"
+                                TextColor="Black"
+                                CornerRadius="10"/>
+                        <Button Text="📦 Planes"
+                                BackgroundColor="#F7F7F7"
+                                TextColor="Black"
+                                CornerRadius="10"/>
+                    </HorizontalStackLayout>
+
+                    <Image Source="kynos.png" HeightRequest="100" Aspect="AspectFit" HorizontalOptions="Center"/>
+
+                    <Label Text="KINOS GUARDERIA"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="Black"
+                           HorizontalOptions="Center"/>
+
+                    <Label Text="Servicios"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="Black"/>
+
+                    <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                        <Frame Grid.Column="0" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
+                            <VerticalStackLayout>
+                                <Image Source="peluqueria.png" HeightRequest="80" Aspect="AspectFill"/>
+                                <Label Text="Brand" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
+                                <Label Text="Peluquería" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                                <Label Text="SSSS" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <Frame Grid.Column="1" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
+                            <VerticalStackLayout>
+                                <Image Source="guarderia.png" HeightRequest="80" Aspect="AspectFill"/>
+                                <Label Text="Brand" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
+                                <Label Text="Guardería" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                                <Label Text="SSSS" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <Frame Grid.Column="2" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
+                            <VerticalStackLayout>
+                                <Image Source="bcanino.png" HeightRequest="80" Aspect="AspectFill"/>
+                                <Label Text="Brand" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
+                                <Label Text="Baño" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                                <Label Text="SSSS" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Grid Grid.Row="2" BackgroundColor="#B9F5F2" Padding="10,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <ImageButton Source="home_icon.png" Grid.Column="0" HorizontalOptions="Center"/>
+                <ImageButton Source="calendar_icon.png" Grid.Column="1" HorizontalOptions="Center"/>
+                <ImageButton Source="cart_icon.png" Grid.Column="2" HorizontalOptions="Center"/>
+                <ImageButton Source="user_icon.png" Grid.Column="3" HorizontalOptions="Center"/>
+            </Grid>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>
