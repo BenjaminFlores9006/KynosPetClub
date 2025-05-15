@@ -7,12 +7,6 @@
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="20">
 
-                <!-- Hora (simulada) -->
-                <Label Text="9:41"
-                       FontSize="16"
-                       TextColor="Black"
-                       HorizontalOptions="End"/>
-
                 <!-- Saludo -->
                 <Label Text="Hola, Benjamin"
                        FontSize="24"
