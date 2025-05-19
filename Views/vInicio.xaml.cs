@@ -1,25 +1,52 @@
 using KynosPetClub.Models;
+using KynosPetClub.Services;
 
 namespace KynosPetClub.Views;
 
 public partial class vInicio : ContentPage
 {
     private Usuario _usuarioActual;
+    private readonly ApiService _apiService;
 
     public vInicio()
     {
         InitializeComponent();
+        _apiService = new ApiService();
     }
 
     public vInicio(Usuario usuario)
     {
         InitializeComponent();
         _usuarioActual = usuario;
+        _apiService = new ApiService();
 
-        // Personalizar el saludo con el nombre del usuario
         if (_usuarioActual != null)
         {
             lblSaludo.Text = $"Hola, {_usuarioActual.nombre}";
+        }
+
+        CargarServicios();
+    }
+
+    private async void CargarServicios()
+    {
+        try
+        {
+            var servicios = await _apiService.ObtenerServiciosAsync();
+
+            if (servicios != null && servicios.Any())
+            {
+                // Aquí podrías bindear los servicios a una lista o colección
+                // Por ahora solo mostramos en consola
+                foreach (var servicio in servicios)
+                {
+                    Console.WriteLine($"Servicio: {servicio.Nombre} - ${servicio.Precio}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar servicios: {ex.Message}");
         }
     }
 

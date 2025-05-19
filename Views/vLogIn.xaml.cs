@@ -29,32 +29,47 @@ public partial class vLogIn : ContentPage
         btnIniciarSesion.IsEnabled = false;
         btnIniciarSesion.Text = "Iniciando sesión...";
 
+        if (string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(contraseña))
+        {
+            await DisplayAlert("Error", "Por favor ingresa tu correo y contraseña", "Ok");
+            return;
+        }
+
+        // Validación de formato de correo
+        if (!correo.Contains("@") || !correo.Contains("."))
+        {
+            await DisplayAlert("Error", "Por favor ingresa un correo electrónico válido", "Ok");
+            return;
+        }
+
+        // Mostrar indicador de carga
+        btnIniciarSesion.IsEnabled = false;
+        btnIniciarSesion.Text = "Iniciando sesión...";
+
         try
         {
-            // Agregamos un mensaje de depuración
-            Console.WriteLine($"Intentando iniciar sesión con correo: {correo}");
-
-            var usuario = await _apiService.LogInUsuarioAsync(correo, contraseña);
+            var usuario = await _apiService.LoginUsuarioAsync(correo, contraseña);
 
             if (usuario != null)
             {
-                Console.WriteLine($"Login exitoso para: {usuario.nombre} {usuario.apellido}");
+                // Guardar datos de sesión (podría usarse SecureStorage)
+                await SecureStorage.SetAsync("user_id", usuario.Id.ToString());
+                await SecureStorage.SetAsync("user_name", $"{usuario.nombre} {usuario.apellido}");
+                await SecureStorage.SetAsync("user_email", usuario.correo);
 
                 // Redirigir a la página de inicio
                 await Navigation.PushAsync(new vInicio(usuario));
 
-                // Opcional: Limpiar la página de login de la pila de navegación
+                // Limpiar la página de login de la pila de navegación
                 Navigation.RemovePage(this);
             }
             else
             {
-                Console.WriteLine("Login fallido: usuario no encontrado");
                 await DisplayAlert("Error", "Credenciales inválidas. Por favor verifica tu correo y contraseña.", "OK");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Excepción durante login: {ex.Message}");
             await DisplayAlert("Error", $"Ocurrió un error: {ex.Message}", "OK");
         }
         finally

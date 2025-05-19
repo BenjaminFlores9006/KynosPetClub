@@ -8,6 +8,9 @@ public partial class vRegistro : ContentPage
     public vRegistro()
     {
         InitializeComponent();
+        dtpFechaNacimiento.Date = DateTime.Today.AddYears(-18);
+        //Establecer fecha por defecto
+        dtpFechaNacimiento.MaximumDate = DateTime.Today; // Establecer fecha máxima
     }
 
     private async void btnRegistrar_Clicked(object sender, EventArgs e)
@@ -22,6 +25,36 @@ public partial class vRegistro : ContentPage
             return;
         }
 
+        // Validación de correo electrónico
+        if (!txtCorreo.Text.Contains("@") || !txtCorreo.Text.Contains("."))
+        {
+            await DisplayAlert("Error", "Por favor ingresa un correo electrónico válido", "OK");
+            return;
+        }
+
+        // Validación de contraseña
+        if (txtPassword.Text.Length < 6)
+        {
+            await DisplayAlert("Error", "La contraseña debe tener al menos 6 caracteres", "OK");
+            return;
+        }
+
+        // Validación de coincidencia de contraseñas
+        if (txtPassword.Text != txtRepetirPassword.Text)
+        {
+            await DisplayAlert("Error", "Las contraseñas no coinciden", "OK");
+            return;
+        }
+
+        // Validación de edad (mayor de 16 años)
+        var edad = DateTime.Today.Year - dtpFechaNacimiento.Date.Year;
+        if (dtpFechaNacimiento.Date > DateTime.Today.AddYears(-edad)) edad--;
+
+        if (edad < 16)
+        {
+            await DisplayAlert("Error", "Debes tener al menos 16 años para registrarte", "OK");
+            return;
+        }
         // Mostrar indicador de carga
         btnRegistrar.IsEnabled = false;
         btnRegistrar.Text = "Registrando...";
@@ -52,7 +85,8 @@ public partial class vRegistro : ContentPage
             else
             {
                 // Mostrar mensaje de error
-                await DisplayAlert("Error", resultado, "OK");
+                await DisplayAlert("Error", resultado.Contains("ERROR") ?
+                    resultado : "Ocurrió un error al registrar el usuario", "OK");
             }
         }
         catch (Exception ex)

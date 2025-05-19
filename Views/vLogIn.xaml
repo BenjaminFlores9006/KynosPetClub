@@ -8,15 +8,18 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
 
-            <Label Text="Kynos Guardería: ¡Diversión y cuidado garantizado!"
-                   FontSize="16"
-                   FontAttributes="Bold"
+            <Label Text="Kynos Guardería: ¡Diversión y cuidado garantizado!" 
+                   FontSize="16" FontAttributes="Bold"
                    HorizontalTextAlignment="Center" />
 
-            <Image Source="kynos_logo.png" HeightRequest="200" HorizontalOptions="Center" />
+            <Image Source="kynos_logo.png" HeightRequest="200"
+                   HorizontalOptions="Center" />
 
-            <Label Text="Iniciar sesión" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
-            <Label Text="Introduce tu email y contraseña para ingresar" FontSize="14" HorizontalTextAlignment="Center"/>
+            <Label Text="Iniciar sesión" FontSize="18" FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+
+            <Label Text="Introduce tu email y contraseña para ingresar"
+                   FontSize="14" HorizontalTextAlignment="Center"/>
 
             <!-- Campo de Correo -->
             <Entry x:Name="txtCorreo"
@@ -49,21 +52,7 @@
 
             <BoxView HeightRequest="1" Color="LightGray" Margin="0,20" />
 
-            <!-- Continuar con Google -->
-            <Button Text="Continuar con Google"
-                    BackgroundColor="#A6E3E9"
-                    TextColor="Black"
-                    CornerRadius="5"
-                    HeightRequest="45"/>
-
-            <!-- Continuar con Apple -->
-            <Button Text="Continuar con Apple"
-                    BackgroundColor="#A6E3E9"
-                    TextColor="Black"
-                    CornerRadius="5"
-                    HeightRequest="45"/>
-
-            <!-- Registro -->
+            <!-- Botón Registro -->
             <Button x:Name="btnRegistrar"
                     Text="¿No tienes cuenta? Regístrate"
                     BackgroundColor="Transparent"
@@ -82,7 +71,6 @@
                     </FormattedString>
                 </Label.FormattedText>
             </Label>
-
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

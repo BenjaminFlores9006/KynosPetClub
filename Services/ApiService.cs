@@ -21,33 +21,24 @@ namespace KynosPetClub.Services
             _supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmd3licWF5a3llcmxqcWZxdHprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTU1MTcsImV4cCI6MjA2MzE5MTUxN30.0NvvKf7vF_SLMB4OvpxgatIACDStEWu6MR83LCkn5C0";
 
             // Configurar los headers globales para todas las peticiones
-            ConfigurarHeadersHttpClient();
+            ConfigureHttpClientHeaders();
         }
 
-        private void ConfigurarHeadersHttpClient()
+        private void ConfigureHttpClientHeaders()
         {
-            // Limpiar headers existentes para evitar duplicados
             _httpClient.DefaultRequestHeaders.Clear();
-
-            // Agregar headers de autenticación
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _supabaseApiKey);
             _httpClient.DefaultRequestHeaders.Add("apikey", _supabaseApiKey);
-
-            // Content-Type ya se configura en cada request específico, no es necesario aquí
         }
 
         public async Task<string> RegistrarUsuarioAsync(Usuario usuario)
         {
             try
             {
-                // Para depuración
-                Console.WriteLine($"Registrando usuario: {usuario.nombre} {usuario.apellido}, email: {usuario.correo}");
+                Console.WriteLine($"Registrando usuario: {usuario.nombre} {usuario.apellido}");
 
-                // URL específica para la tabla usuario
                 string url = $"{_supabaseUrl}/usuario";
 
-                // Crear un objeto anónimo para enviar solo los campos necesarios
-                // Excluimos el id para evitar el error GENERATED ALWAYS
                 var usuarioData = new
                 {
                     nombre = usuario.nombre,
@@ -55,9 +46,8 @@ namespace KynosPetClub.Services
                     fechanac = usuario.fechanac,
                     correo = usuario.correo,
                     contraseña = usuario.contraseña,
-                    // Solo incluimos estos campos si tienen valor
                     auth_id = usuario.AuthId,
-                    rol_id = usuario.RolId,
+                    rol_id = usuario.RolId ?? 2, // Por defecto rol de cliente
                     plan_id = usuario.PlanId
                 };
 
@@ -72,7 +62,6 @@ namespace KynosPetClub.Services
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                // Configurar preferencias para Supabase
                 _httpClient.DefaultRequestHeaders.Remove("Prefer");
                 _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
 
@@ -86,7 +75,6 @@ namespace KynosPetClub.Services
                 }
                 else
                 {
-                    // Leer el error detallado
                     var error = await response.Content.ReadAsStringAsync();
                     Console.WriteLine($"Error HTTP {response.StatusCode}: {error}");
                     return $"ERROR: [{response.StatusCode}] {error}";
@@ -94,7 +82,7 @@ namespace KynosPetClub.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Excepción: {ex.Message}");
+                Console.WriteLine($"Exception: {ex.Message}");
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner: {ex.InnerException.Message}");
@@ -103,20 +91,17 @@ namespace KynosPetClub.Services
             }
         }
 
-        public async Task<Usuario?> LogInUsuarioAsync(string correo, string contraseña)
+        public async Task<Usuario?> LoginUsuarioAsync(string correo, string contraseña)
         {
             try
             {
                 Console.WriteLine($"Intentando login con: {correo}");
 
-                // URL específica para la tabla usuario con filtros
                 var url = $"{_supabaseUrl}/usuario?correo=eq.{Uri.EscapeDataString(correo)}&contraseña=eq.{Uri.EscapeDataString(contraseña)}";
 
-                // Para depuración - mostramos la URL (sin la contraseña para evitar exponerla)
                 Console.WriteLine($"URL de búsqueda: {_supabaseUrl}/usuario?correo=eq.{Uri.EscapeDataString(correo)}&contraseña=***");
 
                 var response = await _httpClient.GetAsync(url);
-
                 Console.WriteLine($"Código de respuesta: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
@@ -129,12 +114,7 @@ namespace KynosPetClub.Services
                 var json = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Respuesta recibida (longitud): {json.Length} caracteres");
 
-                // Opciones para deserializar correctamente con nombres en minúsculas
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var usuarios = JsonSerializer.Deserialize<List<Usuario>>(json, options);
 
                 if (usuarios == null || !usuarios.Any())
@@ -148,7 +128,7 @@ namespace KynosPetClub.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Excepción en login: {ex.Message}");
+                Console.WriteLine($"Exception en login: {ex.Message}");
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner: {ex.InnerException.Message}");
