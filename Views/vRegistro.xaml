@@ -4,67 +4,90 @@
              x:Class="KynosPetClub.Views.vRegistro"
              BackgroundColor="White"
              Title="Registro">
-
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
-
+        <VerticalStackLayout Padding="20" Spacing="10" VerticalOptions="Center">
             <Label Text="Crea tu cuenta en Kynos"
                    FontSize="18"
                    FontAttributes="Bold"
-                   HorizontalTextAlignment="Center" />
-
+                   HorizontalTextAlignment="Center" 
+                   Margin="0,0,0,5"/>
             <Label Text="Completa el siguiente formulario" 
                    FontSize="14" 
-                   HorizontalTextAlignment="Center" />
+                   HorizontalTextAlignment="Center"
+                   Margin="0,0,0,15" />
 
             <!-- Campo Nombre -->
+            <Label Text="Nombre:" 
+                   FontSize="14" 
+                   TextColor="#333333"/>
             <Entry x:Name="txtNombre"
                    Placeholder="Nombre"
                    BackgroundColor="White"
                    TextColor="Black"
                    PlaceholderColor="Gray"
-                   HeightRequest="40" />
+                   HeightRequest="40" 
+                   Margin="0,0,0,10"/>
 
             <!-- Campo Apellido -->
+            <Label Text="Apellido:" 
+                   FontSize="14" 
+                   TextColor="#333333"/>
             <Entry x:Name="txtApellido"
                    Placeholder="Apellido"
                    BackgroundColor="White"
                    TextColor="Black"
                    PlaceholderColor="Gray"
-                   HeightRequest="40" />
+                   HeightRequest="40" 
+                   Margin="0,0,0,10"/>
 
             <!-- Campo Correo -->
+            <Label Text="Correo electrónico:" 
+                   FontSize="14" 
+                   TextColor="#333333"/>
             <Entry x:Name="txtCorreo"
                    Placeholder="Correo electrónico"
                    Keyboard="Email"
                    BackgroundColor="White"
                    TextColor="Black"
                    PlaceholderColor="Gray"
-                   HeightRequest="40" />
+                   HeightRequest="40" 
+                   Margin="0,0,0,10"/>
 
             <!-- Campo Fecha de Nacimiento -->
+            <Label Text="Fecha de nacimiento:" 
+                   FontSize="14" 
+                   TextColor="#333333"/>
             <DatePicker x:Name="dtpFechaNacimiento"
                         Format="dd/MM/yyyy"
                         TextColor="Black"
-                        HeightRequest="40" />
+                        HeightRequest="40" 
+                        Margin="0,0,0,10"/>
 
             <!-- Campo Contraseña -->
+            <Label Text="Contraseña:" 
+                   FontSize="14" 
+                   TextColor="#333333"/>
             <Entry x:Name="txtPassword"
                    Placeholder="Contraseña"
                    IsPassword="True"
                    BackgroundColor="White"
                    TextColor="Black"
                    PlaceholderColor="Gray"
-                   HeightRequest="40" />
+                   HeightRequest="40" 
+                   Margin="0,0,0,10"/>
 
             <!-- Campo Repetir Contraseña -->
+            <Label Text="Confirmar contraseña:" 
+                   FontSize="14" 
+                   TextColor="#333333"/>
             <Entry x:Name="txtRepetirPassword"
                    Placeholder="Repetir contraseña"
                    IsPassword="True"
                    BackgroundColor="White"
                    TextColor="Black"
                    PlaceholderColor="Gray"
-                   HeightRequest="40" />
+                   HeightRequest="40" 
+                   Margin="0,0,0,15"/>
 
             <!-- Botón Guardar -->
             <Button x:Name="btnRegistrar"
@@ -73,14 +96,14 @@
                     BackgroundColor="#FFC107"
                     TextColor="Black"
                     CornerRadius="5"
-                    HeightRequest="45" />
+                    HeightRequest="45"
+                    Margin="0,5,0,10" />
 
             <!-- Mensaje de estado -->
             <Label x:Name="lblMensaje"
                    FontSize="14"
                    TextColor="Red"
                    HorizontalTextAlignment="Center" />
-
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
