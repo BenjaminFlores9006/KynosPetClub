@@ -67,8 +67,9 @@
                    HeightRequest="40" />
 
             <!-- Botón Guardar -->
-            <Button Text="Guardar Usuario"
-                    Clicked="Button_Clicked"    
+            <Button x:Name="btnRegistrar"
+                    Text="Guardar Usuario"
+                    Clicked="btnRegistrar_Clicked"    
                     BackgroundColor="#FFC107"
                     TextColor="Black"
                     CornerRadius="5"

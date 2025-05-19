@@ -1,45 +1,32 @@
 using KynosPetClub.Models;
+using KynosPetClub.Services;
 
 namespace KynosPetClub.Views;
 
 public partial class vRegistro : ContentPage
 {
-	public vRegistro()
-	{
-		InitializeComponent();
-	}
-
-    private async void Button_Clicked(object sender, EventArgs e)
+    public vRegistro()
     {
-        lblMensaje.Text = "";
+        InitializeComponent();
+    }
 
-        if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
-            string.IsNullOrWhiteSpace(txtApellido.Text) ||
-            string.IsNullOrWhiteSpace(txtCorreo.Text) ||
-            string.IsNullOrWhiteSpace(txtPassword.Text) ||
-            string.IsNullOrWhiteSpace(txtRepetirPassword.Text))
+    private async void btnRegistrar_Clicked(object sender, EventArgs e)
+    {
+        var nuevoUsuario = new Usuario
         {
-            lblMensaje.TextColor = Colors.Red;
-            lblMensaje.Text = "Todos los campos son obligatorios.";
-            return;
-        }
+            nombre = txtNombre.Text,
+            apellido = txtApellido.Text,
+            fechanac = dtpFechaNacimiento.Date,
+            correo = txtCorreo.Text,
+            contraseña = txtPassword.Text
+        };
 
-        if (txtPassword.Text != txtRepetirPassword.Text)
-        {
-            lblMensaje.TextColor = Colors.Red;
-            lblMensaje.Text = "Las contraseñas no coinciden.";
-            return;
-        }
+        var api = new ApiService();
+        var resultado = await api.RegistrarUsuarioAsync(nuevoUsuario);
 
-        // Guardar temporalmente el usuario
-        UsuarioTemporal.Correo = txtCorreo.Text.Trim();
-        UsuarioTemporal.Password = txtPassword.Text;
-
-        lblMensaje.TextColor = Colors.Green;
-        lblMensaje.Text = "Usuario registrado correctamente.";
-
-        await Task.Delay(1000);
-
-        await Navigation.PopAsync(); // Regresar al login
+        if (resultado == "OK")
+            await DisplayAlert("Éxito", "Usuario registrado correctamente", "OK");
+        else
+            await DisplayAlert("Error", resultado, "OK"); // ? Ahora te mostrará el mensaje exacto de Supabase
     }
 }

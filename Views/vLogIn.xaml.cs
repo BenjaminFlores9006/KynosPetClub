@@ -1,31 +1,31 @@
 using KynosPetClub.Models;
+using KynosPetClub.Services;
 
 namespace KynosPetClub.Views;
 
 public partial class vLogIn : ContentPage
 {
-	public vLogIn()
-	{
-		InitializeComponent();
-	}
-
-    private async void Button_Clicked(object sender, EventArgs e)
+    public vLogIn()
     {
-        await Navigation.PushAsync(new vRegistro());
+        InitializeComponent();
     }
 
-    private async void Button_Clicked_1(object sender, EventArgs e)
+    private async void btnIniciarSesion_Clicked(object sender, EventArgs e)
     {
-        string correoIngresado = txtCorreo.Text;
-        string passwordIngresado = txtPassword.Text;
+        var correo = txtCorreo.Text;
+        var contraseña = txtPassword.Text;
 
-        if (correoIngresado == UsuarioTemporal.Correo && passwordIngresado == UsuarioTemporal.Password)
-        {
-            await Navigation.PushAsync(new vInicio());
-        }
+        var api = new ApiService();
+        var usuario = await api.LogInUsuarioAsync(correo, contraseña);
+
+        if (usuario != null)
+            await DisplayAlert("Bienvenido", $"Hola {usuario.nombre}!", "OK");
         else
-        {
-            await DisplayAlert("Error", "Correo o contraseña incorrectos", "OK");
-        }
+            await DisplayAlert("Error", "Credenciales inválidas", "OK");
+    }
+
+    private async void btnRegistrar_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new vRegistro());
     }
 }
