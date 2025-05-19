@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KynosPetClub.Views.vLogIn"
@@ -8,20 +8,19 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
 
-       
             <Label Text="Kynos Guardería: ¡Diversión y cuidado garantizado!"
                    FontSize="16"
                    FontAttributes="Bold"
                    HorizontalTextAlignment="Center" />
 
-        
             <Image Source="kynos_logo.png" HeightRequest="200" HorizontalOptions="Center" />
 
-       
-            <Label Text="Crear una cuenta" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
-            <Label Text="Introduce tu email para registrarte" FontSize="14" HorizontalTextAlignment="Center"/>
+            <Label Text="Iniciar sesión" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+            <Label Text="Introduce tu email y contraseña para ingresar" FontSize="14" HorizontalTextAlignment="Center"/>
 
-            <Entry Placeholder="email@example.com"
+            <!-- Campo de Correo -->
+            <Entry x:Name="txtCorreo"
+                   Placeholder="email@example.com"
                    Keyboard="Email"
                    BackgroundColor="White"
                    TextColor="Black"
@@ -29,29 +28,47 @@
                    HeightRequest="40"
                    Margin="0,0,0,10" />
 
+            <!-- Campo de Contraseña -->
+            <Entry x:Name="txtPassword"
+                   Placeholder="Contraseña"
+                   IsPassword="True"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="40"
+                   Margin="0,0,0,10" />
 
-            <Button Text="Continuar"
-                    BackgroundColor="#FFC107"
-                    TextColor="Black"
+            <!-- Botón para iniciar sesión -->
+            <Button Text="Iniciar sesión"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
                     CornerRadius="5"
-                    HeightRequest="45"/>
+                    HeightRequest="45"
+                    Clicked="Button_Clicked_1"/>
 
             <BoxView HeightRequest="1" Color="LightGray" Margin="0,20" />
 
-
+            <!-- Continuar con Google -->
             <Button Text="Continuar con Google"
                     BackgroundColor="#A6E3E9"
                     TextColor="Black"
                     CornerRadius="5"
                     HeightRequest="45"/>
 
-
+            <!-- Continuar con Apple -->
             <Button Text="Continuar con Apple"
                     BackgroundColor="#A6E3E9"
                     TextColor="Black"
                     CornerRadius="5"
                     HeightRequest="45"/>
 
+            <!-- Registro -->
+            <Button Text="¿No tienes cuenta? Regístrate"
+                    BackgroundColor="Transparent"
+                    TextColor="Blue"
+                    Clicked="Button_Clicked"
+            FontAttributes="Bold"
+                    HeightRequest="45"/>
 
             <Label FontSize="12" TextColor="Gray" HorizontalTextAlignment="Center">
                 <Label.FormattedText>
@@ -63,6 +80,7 @@
                     </FormattedString>
                 </Label.FormattedText>
             </Label>
+
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

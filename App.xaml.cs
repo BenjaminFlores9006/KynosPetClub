@@ -11,7 +11,8 @@ namespace KynosPetClub
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new NavigationPage(new vLogIn()));
+            var loginPage = new NavigationPage(new vLogIn());
+            return new Window(loginPage);
         }
     }
 }

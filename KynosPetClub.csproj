@@ -84,6 +84,9 @@
 	  <MauiXaml Update="Views\vPlanes.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\vRegistro.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\vReserva.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

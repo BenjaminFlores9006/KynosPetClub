@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vRegistro"
+             BackgroundColor="White"
+             Title="Registro">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
+
+            <Label Text="Crea tu cuenta en Kynos"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center" />
+
+            <Label Text="Completa el siguiente formulario" 
+                   FontSize="14" 
+                   HorizontalTextAlignment="Center" />
+
+            <!-- Campo Nombre -->
+            <Entry x:Name="txtNombre"
+                   Placeholder="Nombre"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="40" />
+
+            <!-- Campo Apellido -->
+            <Entry x:Name="txtApellido"
+                   Placeholder="Apellido"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="40" />
+
+            <!-- Campo Correo -->
+            <Entry x:Name="txtCorreo"
+                   Placeholder="Correo electrónico"
+                   Keyboard="Email"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="40" />
+
+            <!-- Campo Fecha de Nacimiento -->
+            <DatePicker x:Name="dtpFechaNacimiento"
+                        Format="dd/MM/yyyy"
+                        TextColor="Black"
+                        HeightRequest="40" />
+
+            <!-- Campo Contraseña -->
+            <Entry x:Name="txtPassword"
+                   Placeholder="Contraseña"
+                   IsPassword="True"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="40" />
+
+            <!-- Campo Repetir Contraseña -->
+            <Entry x:Name="txtRepetirPassword"
+                   Placeholder="Repetir contraseña"
+                   IsPassword="True"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="40" />
+
+            <!-- Botón Guardar -->
+            <Button Text="Guardar Usuario"
+                    Clicked="Button_Clicked"    
+                    BackgroundColor="#FFC107"
+                    TextColor="Black"
+                    CornerRadius="5"
+                    HeightRequest="45" />
+
+            <!-- Mensaje de estado -->
+            <Label x:Name="lblMensaje"
+                   FontSize="14"
+                   TextColor="Red"
+                   HorizontalTextAlignment="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
