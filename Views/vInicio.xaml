@@ -80,20 +80,10 @@
                         </VerticalStackLayout>
                     </Frame>
                 </Grid>
-
-                <Button x:Name="btnMascotas"
-                        Text="Mis Mascotas"
-                        BackgroundColor="#4CAF50"
-                        TextColor="White"
-                        CornerRadius="10"
-                        Margin="0,20,0,0"
-                        HeightRequest="45"
-                        Clicked="btnMascotas_Clicked"/>
-
             </VerticalStackLayout>
         </ScrollView>
 
-        <Grid Grid.Row="2" BackgroundColor="#B9F5F2" Padding="10,5">
+        <Grid Grid.Row="2" BackgroundColor="#B9F5F2" Padding="10,5" HeightRequest="60">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -101,10 +91,33 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <ImageButton Source="home_icon.png" Grid.Column="0" HorizontalOptions="Center" x:Name="btnHome"/>
-            <ImageButton Source="calendar_icon.png" Grid.Column="1" HorizontalOptions="Center" x:Name="btnCalendar"/>
-            <ImageButton Source="cart_icon.png" Grid.Column="2" HorizontalOptions="Center" x:Name="btnCart"/>
-            <ImageButton Source="user_icon.png" Grid.Column="3" HorizontalOptions="Center" x:Name="btnUser"/>
+            <ImageButton Source="home.png" Grid.Column="0" 
+                 HorizontalOptions="Center" 
+                 HeightRequest="40" WidthRequest="40"
+                 BackgroundColor="Transparent"
+                 x:Name="btnInicio" 
+                 Clicked="btnInicio_Clicked"/>
+
+            <ImageButton Source="reserva.png" Grid.Column="1" 
+                 HorizontalOptions="Center" 
+                 HeightRequest="40" WidthRequest="40"
+                 BackgroundColor="Transparent"
+                 x:Name="btnReserva" 
+                 Clicked="btnReserva_Clicked"/>
+
+            <ImageButton Source="pagos.png" Grid.Column="2" 
+                 HorizontalOptions="Center" 
+                 HeightRequest="40" WidthRequest="40"
+                 BackgroundColor="Transparent"
+                 x:Name="btnPagos" 
+                 Clicked="btnPagos_Clicked"/>
+
+            <ImageButton Source="perfil.png" Grid.Column="3" 
+                 HorizontalOptions="Center" 
+                 HeightRequest="40" WidthRequest="40"
+                 BackgroundColor="Transparent"
+                 x:Name="btnPerfil" 
+                 Clicked="btnPerfil_Clicked"/>
         </Grid>
     </Grid>
 </ContentPage>

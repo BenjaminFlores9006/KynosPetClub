@@ -3,111 +3,164 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KynosPetClub.Views.vPerfil"
              Title="Perfil">
-    <ContentPage.Content>
-        <ScrollView>
-            <VerticalStackLayout Padding="20" Spacing="20">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Hora (simulada) -->
+            <Label Text="{Binding CurrentTime, StringFormat='{0:HH:mm}'}"
+                   FontSize="16"
+                   TextColor="Black"
+                   HorizontalOptions="End"/>
 
-                <!-- Saludo -->
-                <Label Text="Hola, Benjamin"
-                       FontSize="24"
-                       FontAttributes="Bold"
-                       TextColor="Black"/>
+            <!-- Saludo -->
+            <Label x:Name="lblSaludo"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="Black"/>
 
-                <!-- Información del usuario -->
-                <Frame BackgroundColor="#F7F7F7" Padding="15" CornerRadius="10" HasShadow="False">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="{Binding UserName}"
-                               FontSize="18"
-                               FontAttributes="Bold"/>
-                        <Label Text="{Binding UserEmail}"
-                               FontSize="14"
-                               TextColor="Gray"/>
+            <!-- Información del usuario -->
+            <Frame BackgroundColor="#F7F7F7" 
+                   Padding="15"
+                   CornerRadius="10" 
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Label x:Name="lblNombre"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
+                    <Label x:Name="lblCorreo"
+                           FontSize="14"
+                           TextColor="Gray"/>
+                    <Label x:Name="lblFechaNac"
+                           FontSize="14"
+                           TextColor="Gray"/>
 
-                        <!-- Botón Editar Perfil -->
-                        <Button Text="Editar Perfil"
-                                BackgroundColor="Transparent"
-                                TextColor="#007AFF"
-                                BorderColor="#007AFF"
-                                BorderWidth="1"
-                                CornerRadius="10"
-                                HorizontalOptions="Start"
-                                Padding="20,5"/>
-                    </VerticalStackLayout>
-                </Frame>
+                    <!-- Botón Editar Perfil -->
+                    <Button x:Name="btnEditarPerfil"
+                            Text="Editar Perfil"
+                            BackgroundColor="Transparent"
+                            TextColor="#007AFF"
+                            BorderColor="#007AFF"
+                            BorderWidth="1"
+                            CornerRadius="5"
+                            HorizontalOptions="Start"
+                            Padding="10,5"
+                            FontSize="14"
+                            HeightRequest="35"
+                            Clicked="btnEditarPerfil_Clicked"/>
+                </VerticalStackLayout>
+            </Frame>
 
-                <!-- Sección de mascotas -->
-                <Label Text="Tus Mascotas"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       TextColor="Black"/>
+            <!-- Sección de mascotas -->
+            <Label Text="Tus Mascotas"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="Black"/>
 
-                <!-- Grid de mascotas -->
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="15" RowSpacing="15">
-                    <!-- Fila 1 - Títulos -->
-                    <Label Text="Perro" Grid.Column="0" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    <Label Text="Gato" Grid.Column="1" FontAttributes="Bold" HorizontalOptions="Center"/>
+            <!-- CollectionView para mascotas -->
+            <CollectionView x:Name="cvMascotas"
+                           SelectionMode="None"
+                           HeightRequest="250">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" 
+                                    Span="2"
+                                    VerticalItemSpacing="10"
+                                    HorizontalItemSpacing="10"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame CornerRadius="10" 
+                               HasShadow="True" 
+                               Padding="10"
+                               HeightRequest="160"
+                               MinimumWidthRequest="160">
+                            <VerticalStackLayout Spacing="8">
+                                <Image Source="{Binding Especie, Converter={StaticResource EspecieToImageConverter}}"
+                                       HeightRequest="60"
+                                       WidthRequest="60"
+                                       HorizontalOptions="Center"/>
 
-                    <!-- Fila 2 - Mascotas -->
-                    <Frame Grid.Row="1" Grid.Column="0" CornerRadius="10" HasShadow="True" Padding="10">
-                        <VerticalStackLayout HorizontalOptions="Center" Spacing="5">
-                            <Image Source="dog_icon.png" HeightRequest="60" WidthRequest="60"/>
-                            <Label Text="Rosie" FontSize="16" HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                                <Label Text="{Binding Nombre}" 
+                                       FontSize="14" 
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"/>
 
-                    <Frame Grid.Row="1" Grid.Column="1" CornerRadius="10" HasShadow="True" Padding="10">
-                        <VerticalStackLayout HorizontalOptions="Center" Spacing="5">
-                            <Image Source="cat_icon.png" HeightRequest="60" WidthRequest="60"/>
-                            <Label Text="Coco" FontSize="16" HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </Grid>
+                                <Label Text="{Binding FechaNacimiento, StringFormat='Nac: {0:dd/MM/yyyy}'}"
+                                       FontSize="12"
+                                       TextColor="Gray"
+                                       HorizontalOptions="Center"/>
 
-                <!-- Botón Añadir Mascota -->
-                <Button Text="+ Añadir mascota"
-                        BackgroundColor="#9EFFAC"
-                        TextColor="Black"
-                        CornerRadius="10"
-                        FontAttributes="Bold"
-                        HeightRequest="50"/>
+                                <Grid ColumnDefinitions="*,*" 
+                                      RowDefinitions="Auto"
+                                      HorizontalOptions="Fill"
+                                      VerticalOptions="End">
+                                    <Button Grid.Column="0"
+                                            Text="Editar"
+                                            BackgroundColor="#FFC107"
+                                            TextColor="Black"
+                                            CornerRadius="5"
+                                            Margin="0,0,5,0"
+                                            FontSize="12"
+                                            HeightRequest="30"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="btnEditarMascota_Clicked"/>
 
-                <!-- Sección adicional para perfil completo -->
-                <Frame BackgroundColor="#F7F7F7" Padding="15" CornerRadius="10" HasShadow="False">
-                    <VerticalStackLayout Spacing="15">
-                        <Label Text="Configuración"
-                               FontSize="18"
-                               FontAttributes="Bold"/>
+                                    <Button Grid.Column="1"
+                                            Text="Eliminar"
+                                            BackgroundColor="#FF5252"
+                                            TextColor="White"
+                                            CornerRadius="5"
+                                            Margin="5,0,0,0"
+                                            FontSize="12"
+                                            HeightRequest="30"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="btnEliminarMascota_Clicked"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-                        <HorizontalStackLayout Spacing="10">
-                            <Image Source="notification_icon.png" HeightRequest="30"/>
-                            <Label Text="Notificaciones" VerticalOptions="Center"/>
-                            <Switch IsToggled="True" HorizontalOptions="EndAndExpand"/>
-                        </HorizontalStackLayout>
+            <!-- Botón Añadir Mascota -->
+            <Button x:Name="btnAgregarMascota"
+                    Text="+ Añadir mascota"
+                    BackgroundColor="#9EFFAC"
+                    TextColor="Black"
+                    CornerRadius="10"
+                    FontAttributes="Bold"
+                    HeightRequest="45"
+                    Clicked="btnAgregarMascota_Clicked"/>
 
-                        <HorizontalStackLayout Spacing="10">
-                            <Image Source="location_icon.png" HeightRequest="30"/>
-                            <Label Text="Ubicación guardada" VerticalOptions="Center"/>
-                            <Image Source="chevron_right.png" HeightRequest="20" HorizontalOptions="EndAndExpand"/>
-                        </HorizontalStackLayout>
+            <!-- Configuración -->
+            <Frame BackgroundColor="#F7F7F7"
+                   Padding="15"
+                   CornerRadius="10"
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="Configuración"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
 
-                        <HorizontalStackLayout Spacing="10">
-                            <Image Source="payment_icon.png" HeightRequest="30"/>
-                            <Label Text="Métodos de pago" VerticalOptions="Center"/>
-                            <Image Source="chevron_right.png" HeightRequest="20" HorizontalOptions="EndAndExpand"/>
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                </Frame>
+                    <HorizontalStackLayout Spacing="10">
+                        <Image Source="notification_icon.png"
+                               HeightRequest="24"/>
+                        <Label Text="Notificaciones"
+                               VerticalOptions="Center"/>
+                        <Switch IsToggled="True"
+                                HorizontalOptions="EndAndExpand"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
 
-                <!-- Botón Cerrar Sesión -->
-                <Button Text="Cerrar Sesión"
-                        TextColor="Red"
-                        BackgroundColor="Transparent"
-                        BorderColor="Red"
-                        BorderWidth="1"
-                        CornerRadius="10"
-                        HeightRequest="50"/>
-
-            </VerticalStackLayout>
-        </ScrollView>
-    </ContentPage.Content>
+            <!-- Botón Cerrar Sesión -->
+            <Button x:Name="btnCerrarSesion"
+                    Text="Cerrar Sesión"
+                    TextColor="Red"
+                    BackgroundColor="Transparent"
+                    BorderColor="Red"
+                    BorderWidth="1"
+                    CornerRadius="5"
+                    HeightRequest="45"
+                    Clicked="btnCerrarSesion_Clicked"/>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

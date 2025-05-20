@@ -50,25 +50,35 @@ public partial class vInicio : ContentPage
         }
     }
 
-    private async void btnMascotas_Clicked(object sender, EventArgs e)
-    {
-        // Aquí iría la navegación a la página de mascotas
-        // Por ejemplo:
-        // await Navigation.PushAsync(new vMascotas(_usuarioActual));
-
-        // Por ahora, solo mostraremos un mensaje
-        await DisplayAlert("Próximamente", "La gestión de mascotas estará disponible pronto", "OK");
-    }
-
     // También podrías agregar handlers para los botones del menú inferior
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
         // Configurar eventos de los botones del menú inferior si es necesario
-        btnHome.Clicked += (sender, e) => { /* Acción para Home */ };
-        btnCalendar.Clicked += (sender, e) => { /* Acción para Calendar */ };
-        btnCart.Clicked += (sender, e) => { /* Acción para Cart */ };
-        btnUser.Clicked += (sender, e) => { /* Acción para User */ };
+        btnInicio.Clicked += (sender, e) => { /* Acción para Home */ };
+        btnReserva.Clicked += (sender, e) => { /* Acción para Calendar */ };
+        btnPagos.Clicked += (sender, e) => { /* Acción para Cart */ };
+        btnPerfil.Clicked += (sender, e) => { /* Acción para User */ };
+    }
+
+    private async void btnInicio_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new vInicio(_usuarioActual));
+    }
+
+    private async void btnReserva_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new vReserva());
+    }
+
+    private async void btnPagos_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new vPagos());
+    }
+
+    private async void btnPerfil_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new vPerfil(_usuarioActual));
     }
 }

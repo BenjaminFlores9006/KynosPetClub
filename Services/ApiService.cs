@@ -220,5 +220,111 @@ namespace KynosPetClub.Services
                 return $"ERROR: {ex.Message}";
             }
         }
+
+        public async Task<bool> ActualizarUsuarioAsync(Usuario usuario)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/usuario?id=eq.{usuario.Id}";
+                var usuarioData = new
+                {
+                    nombre = usuario.nombre,
+                    apellido = usuario.apellido
+                };
+
+                var json = JsonSerializer.Serialize(usuarioData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PatchAsync(url, content);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar usuario: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<string> AgregarMascotaAsync(Mascota mascota)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/mascota";
+                var mascotaData = new
+                {
+                    nombre = mascota.Nombre,
+                    especie = mascota.Especie,
+                    raza = mascota.Raza,
+                    fecha_nacimiento = mascota.FechaNacimiento.ToString("yyyy-MM-dd"),
+                    usuario_id = mascota.UsuarioId
+                };
+
+                var json = JsonSerializer.Serialize(mascotaData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
+                var response = await _httpClient.PostAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return $"Error {response.StatusCode}: {errorContent}";
+                }
+
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                return $"Exception: {ex.Message}";
+            }
+        }
+
+        public async Task<bool> ActualizarMascotaAsync(Mascota mascota)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/mascota?id=eq.{mascota.Id}";
+                var mascotaData = new
+                {
+                    nombre = mascota.Nombre,
+                    especie = mascota.Especie,
+                    raza = mascota.Raza,
+                    fecha_nacimiento = mascota.FechaNacimiento.ToString("yyyy-MM-dd")
+                };
+
+                var json = JsonSerializer.Serialize(mascotaData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PatchAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error al actualizar mascota: {errorContent}");
+                }
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar mascota: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> EliminarMascotaAsync(int mascotaId)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/mascota?id=eq.{mascotaId}";
+                var response = await _httpClient.DeleteAsync(url);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al eliminar mascota: {ex.Message}");
+                return false;
+            }
+        }
     }
 }
