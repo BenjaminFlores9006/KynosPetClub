@@ -6,8 +6,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="20" Spacing="15">
-
-                <Frame BackgroundColor="#9EFFAC" Padding="10" CornerRadius="10" HasShadow="False">
+                <Frame BackgroundColor="#9EFFAC" Padding="10" CornerRadius="10">
                     <Label x:Name="lblSaludo"
                            Text="Hola, Bienvenido"
                            FontSize="16"
@@ -16,23 +15,24 @@
                 </Frame>
 
                 <HorizontalStackLayout HorizontalOptions="CenterAndExpand" Spacing="10">
-                    <Button Text="📜 Historial"
+                    <Button Text="Historial"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="10"
+                            />
+                    <Button Text="Seguimiento"
                             BackgroundColor="#F7F7F7"
                             TextColor="Black"
                             CornerRadius="10"/>
-                    <Button Text="📍 Seguimiento"
+                    <Button Text="Planes"
                             BackgroundColor="#F7F7F7"
                             TextColor="Black"
-                            CornerRadius="10"/>
-                    <Button Text="📦 Planes"
-                            BackgroundColor="#F7F7F7"
-                            TextColor="Black"
-                            CornerRadius="10"/>
+                            CornerRadius="10"
+                            />
                 </HorizontalStackLayout>
 
-                <Image Source="kynos.png" HeightRequest="100" Aspect="AspectFit" HorizontalOptions="Center"/>
-
-                <Label Text="KYNOS GUARDERÍA"
+                <Image Source="kynos.png" HeightRequest="100" HorizontalOptions="Center"/>
+                <Label Text="KYNOS GUARDERIA"
                        FontSize="20"
                        FontAttributes="Bold"
                        TextColor="Black"
@@ -44,40 +44,56 @@
                        TextColor="Black"/>
 
                 <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <!-- 1. Veterinaria -->
                     <Frame Grid.Column="0" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
+                        <VerticalStackLayout>
+                            <Image Source="veterinaria.jpg" HeightRequest="80" Aspect="AspectFill"/>
+                            <Label Text="Servicio" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
+                            <Label Text="Veterinaria" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                            <Label Text="Revisión general de la mascota" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                        </VerticalStackLayout>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="btnServicios_Tapped"/>
+                        </Frame.GestureRecognizers>
+                    </Frame>
+
+                    <!-- 2. Peluquería -->
+                    <Frame Grid.Column="1" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
                         <VerticalStackLayout>
                             <Image Source="peluqueria.png" HeightRequest="80" Aspect="AspectFill"/>
                             <Label Text="Servicio" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
-                            <Label Text="Peluquería" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
-                            <Label Text="Corte y baño para tu mascota" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                            <Label Text="Peluqueria" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                            <Label Text="Baño y corte de pelo" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
                         </VerticalStackLayout>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="btnServicios_Tapped"/>
+                        </Frame.GestureRecognizers>
                     </Frame>
 
-                    <Frame Grid.Column="1" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
+                    <!-- 3. Guardería -->
+                    <Frame Grid.Column="2" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
                         <VerticalStackLayout>
                             <Image Source="guarderia.png" HeightRequest="80" Aspect="AspectFill"/>
                             <Label Text="Servicio" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
-                            <Label Text="Guardería" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
-                            <Label Text="Cuidado y diversión" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                            <Label Text="Guarderia" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                            <Label Text="Adiestramiento canino para cachorros" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
                         </VerticalStackLayout>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="btnServicios_Tapped"/>
+                        </Frame.GestureRecognizers>
                     </Frame>
 
-                    <Frame Grid.Column="2" Grid.Row="0" CornerRadius="10" HasShadow="True" Padding="0">
-                        <VerticalStackLayout>
-                            <Image Source="bcanino.png" HeightRequest="80" Aspect="AspectFill"/>
-                            <Label Text="Servicio" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
-                            <Label Text="Baño" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
-                            <Label Text="Limpieza completa" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
-                        </VerticalStackLayout>
-                    </Frame>
-
+                    <!-- 4. Hospedaje -->
                     <Frame Grid.Column="0" Grid.Row="1" CornerRadius="10" HasShadow="True" Padding="0">
                         <VerticalStackLayout>
-                            <Image Source="veterinaria.png" HeightRequest="80" Aspect="AspectFill"/>
+                            <Image Source="hospedaje.png" HeightRequest="80" Aspect="AspectFill"/>
                             <Label Text="Servicio" FontAttributes="Italic" FontSize="12" Margin="5,2,0,0"/>
-                            <Label Text="Veterinaria" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
-                            <Label Text="Atención médica" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
+                            <Label Text="Hospedaje" FontSize="16" FontAttributes="Bold" TextColor="Black" Margin="5,0,0,0"/>
+                            <Label Text="Hotel para mascotas" FontSize="14" TextColor="DarkGray" Margin="5,0,0,5"/>
                         </VerticalStackLayout>
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="btnServicios_Tapped" CommandParameter="{Binding .}"/>
+                        </Frame.GestureRecognizers>
                     </Frame>
                 </Grid>
             </VerticalStackLayout>
@@ -89,35 +105,51 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <ImageButton Source="home.png" Grid.Column="0" 
-                 HorizontalOptions="Center" 
-                 HeightRequest="40" WidthRequest="40"
-                 BackgroundColor="Transparent"
-                 x:Name="btnInicio" 
-                 Clicked="btnInicio_Clicked"/>
+            <ImageButton Source="home.png" Grid.Column="0"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnInicio"
+                         Clicked="btnInicio_Clicked"/>
 
-            <ImageButton Source="reserva.png" Grid.Column="1" 
-                 HorizontalOptions="Center" 
-                 HeightRequest="40" WidthRequest="40"
-                 BackgroundColor="Transparent"
-                 x:Name="btnReserva" 
-                 Clicked="btnReserva_Clicked"/>
+            <ImageButton Source="reserva.png" Grid.Column="1"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnReserva"
+                         Clicked="btnReserva_Clicked"/>
 
-            <ImageButton Source="pagos.png" Grid.Column="2" 
-                 HorizontalOptions="Center" 
-                 HeightRequest="40" WidthRequest="40"
-                 BackgroundColor="Transparent"
-                 x:Name="btnPagos" 
-                 Clicked="btnPagos_Clicked"/>
+            <ImageButton Source="pagos.png" Grid.Column="2"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnPagos"
+                         Clicked="btnPagos_Clicked"/>
 
-            <ImageButton Source="perfil.png" Grid.Column="3" 
-                 HorizontalOptions="Center" 
-                 HeightRequest="40" WidthRequest="40"
-                 BackgroundColor="Transparent"
-                 x:Name="btnPerfil" 
-                 Clicked="btnPerfil_Clicked"/>
+            <ImageButton Source="planes.png" Grid.Column="3"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnPlanes"
+                         Clicked="btnPlanes_Clicked"/>
+
+            <ImageButton Source="historial.png" Grid.Column="4"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnHistorial"
+                         Clicked="btnHistorial_Clicked"/>
+
+            <ImageButton Source="perfil.png" Grid.Column="5"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnPerfil"
+                         Clicked="btnPerfil_Clicked"/>
         </Grid>
     </Grid>
 </ContentPage>

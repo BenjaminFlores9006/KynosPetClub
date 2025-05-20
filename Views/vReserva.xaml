@@ -8,63 +8,118 @@
     <Grid RowDefinitions="*,Auto">
         <ScrollView>
             <VerticalStackLayout Padding="20" Spacing="15">
-
-                
                 <Label Text="Reservas"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       HorizontalTextAlignment="Center"/>
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"/>
 
-             
-                <Frame Padding="0" HasShadow="False" CornerRadius="10" BorderColor="LightGray">
-                    <Image Source="veterinaria.jpg"
-                           Aspect="AspectFill"
-                           HeightRequest="150"/>
+                <Frame CornerRadius="10" HasShadow="True" Padding="10">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                        <Image x:Name="imgServicio"
+                           Grid.RowSpan="3"
+                           HeightRequest="80"
+                           WidthRequest="80"
+                           Aspect="AspectFill"/>
+
+                        <Label x:Name="lblNombreServicio"
+                           Grid.Column="1"
+                           FontSize="18"
+                           FontAttributes="Bold"/>
+
+                        <Label x:Name="lblPrecioServicio"
+                           Grid.Column="1"
+                           Grid.Row="1"
+                           FontSize="16"
+                           TextColor="#2E7D32"/>
+
+                        <Label x:Name="lblDescripcionServicio"
+                           Grid.Column="1"
+                           Grid.Row="2"
+                           FontSize="14"
+                           TextColor="Gray"/>
+                    </Grid>
+                    
                 </Frame>
 
-           
-                <Label Text="Veterinaria"
-                       FontSize="16"
-                       FontAttributes="Bold"/>
-                <Label Text="$35 / Valor a cancelar"
-                       FontSize="14"
-                       TextColor="Gray"/>
+                <Label Text="Selecciona la fecha:"
+                   FontSize="14"/>
+                <DatePicker x:Name="dpFecha"
+                        MinimumDate="{Binding Today}"
+                        Date="{Binding Today}"/>
 
-    
-                <HorizontalStackLayout Spacing="10">
-                    <Button Text="Jun 10, 2024"
-                            BackgroundColor="#E1F5FE"
-                            TextColor="Black"
-                            CornerRadius="5"/>
-                    <Button Text="9:41 AM"
-                            BackgroundColor="#E1F5FE"
-                            TextColor="Black"
-                            CornerRadius="5"/>
-                </HorizontalStackLayout>
+                <Label Text="Selecciona la hora:"
+                   FontSize="14"/>
+                <TimePicker x:Name="tpHora"/>
 
+                <Label Text="Selecciona tu mascota:"
+                   FontSize="14"/>
+                <Picker x:Name="pkMascotas"
+                    Title="Selecciona una mascota"
+                    ItemDisplayBinding="{Binding Nombre}"/>
 
-                <Button Text="Agendar cita"
-                        BackgroundColor="#FFC107"
-                        TextColor="Black"
-                        CornerRadius="5"
-                        HeightRequest="50"
-                        Margin="0,30,0,0"/>
+                <Button x:Name="btnAgendar"
+                    Text="Agendar cita"
+                    BackgroundColor="#FFC107"
+                    TextColor="Black"
+                    CornerRadius="5"
+                    HeightRequest="50"
+                    Margin="0,30,0,0"
+                    Clicked="btnAgendar_Clicked"/>
             </VerticalStackLayout>
         </ScrollView>
 
 
-        <Grid BackgroundColor="#A6E3E9"
-              Padding="10"
-              RowSpacing="0"
-              ColumnSpacing="20"
-              Grid.Row="1"
-              ColumnDefinitions="*,*,*,*,*">
+        <Grid Grid.Row="2" BackgroundColor="#B9F5F2" Padding="10,5" HeightRequest="60">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <ImageButton Source="home.png" BackgroundColor="Transparent"/>
-            <ImageButton Source="calendar.png" BackgroundColor="Transparent"/>
-            <ImageButton Source="shop.png" BackgroundColor="Transparent"/>
-            <ImageButton Source="heart.png" BackgroundColor="Transparent"/>
-            <ImageButton Source="user.png" BackgroundColor="Transparent"/>
+            <ImageButton Source="home.png" Grid.Column="0"
+                     HorizontalOptions="Center"
+                     HeightRequest="25" WidthRequest="25"
+                     BackgroundColor="Transparent"
+                     x:Name="btnInicio"
+                     />
+
+            <ImageButton Source="reserva.png" Grid.Column="1"
+                     HorizontalOptions="Center"
+                     HeightRequest="25" WidthRequest="25"
+                     BackgroundColor="Transparent"
+                     x:Name="btnReserva"
+                     />
+
+            <ImageButton Source="pagos.png" Grid.Column="2"
+                     HorizontalOptions="Center"
+                     HeightRequest="25" WidthRequest="25"
+                     BackgroundColor="Transparent"
+                     x:Name="btnPagos"
+                     />
+
+            <ImageButton Source="perfil.png" Grid.Column="3"
+                     HorizontalOptions="Center"
+                     HeightRequest="25" WidthRequest="25"
+                     BackgroundColor="Transparent"
+                     x:Name="btnPlanes"
+                     />
+
+            <ImageButton Source="perfil.png" Grid.Column="3"
+                     HorizontalOptions="Center"
+                     HeightRequest="25" WidthRequest="25"
+                     BackgroundColor="Transparent"
+                     x:Name="btnHistorial"
+                     />
+
+            <ImageButton Source="perfil.png" Grid.Column="3"
+                     HorizontalOptions="Center"
+                     HeightRequest="25" WidthRequest="25"
+                     BackgroundColor="Transparent"
+                     x:Name="btnPerfil"
+                     />
         </Grid>
     </Grid>
 </ContentPage>

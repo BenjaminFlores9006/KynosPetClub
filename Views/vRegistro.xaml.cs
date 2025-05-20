@@ -9,13 +9,12 @@ public partial class vRegistro : ContentPage
     {
         InitializeComponent();
         dtpFechaNacimiento.Date = DateTime.Today.AddYears(-18);
-        //Establecer fecha por defecto
-        dtpFechaNacimiento.MaximumDate = DateTime.Today; // Establecer fecha máxima
+        dtpFechaNacimiento.MaximumDate = DateTime.Today;
     }
 
     private async void btnRegistrar_Clicked(object sender, EventArgs e)
     {
-        // Validación básica de campos
+        // Validación de campos
         if (string.IsNullOrEmpty(txtNombre.Text) ||
             string.IsNullOrEmpty(txtApellido.Text) ||
             string.IsNullOrEmpty(txtCorreo.Text) ||

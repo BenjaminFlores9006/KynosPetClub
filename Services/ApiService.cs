@@ -1,6 +1,7 @@
 ﻿using KynosPetClub.Models;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
+using System.Numerics;
 using System.Text;
 using System.Text.Json;
 
@@ -163,64 +164,6 @@ namespace KynosPetClub.Services
             }
         }
 
-        // Método para obtener los servicios disponibles
-        public async Task<List<Servicio>?> ObtenerServiciosAsync()
-        {
-            try
-            {
-                var url = $"{_supabaseUrl}/servicio";
-                var response = await _httpClient.GetAsync(url);
-
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                var json = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                var servicios = JsonSerializer.Deserialize<List<Servicio>>(json, options);
-                return servicios;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        // Método para crear una reserva
-        public async Task<string> CrearReservaAsync(Reserva reserva)
-        {
-            try
-            {
-                var url = $"{_supabaseUrl}/reserva";
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = true
-                };
-
-                var json = JsonSerializer.Serialize(reserva, options);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                _httpClient.DefaultRequestHeaders.Remove("Prefer");
-                _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
-
-                var response = await _httpClient.PostAsync(url, content);
-
-                if (response.IsSuccessStatusCode)
-                    return "OK";
-
-                var error = await response.Content.ReadAsStringAsync();
-                return $"ERROR: {error}";
-            }
-            catch (Exception ex)
-            {
-                return $"ERROR: {ex.Message}";
-            }
-        }
-
         public async Task<bool> ActualizarUsuarioAsync(Usuario usuario)
         {
             try
@@ -324,6 +267,193 @@ namespace KynosPetClub.Services
             {
                 Console.WriteLine($"Error al eliminar mascota: {ex.Message}");
                 return false;
+            }
+        }
+
+        public async Task<List<Servicio>> ObtenerServiciosAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/servicio?select=id,nombre,descripcion,precio";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                return JsonSerializer.Deserialize<List<Servicio>>(json, options);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener servicios: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<List<Reserva>> ObtenerReservasUsuarioAsync(int usuarioId)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/reserva?usuario_id=eq.{usuarioId}&select=*,servicio:servicio_id(*),mascota:mascota_id(*)";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Reserva>>(json, options);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener reservas: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<string> CrearReservaAsync(Reserva reserva)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/reserva";
+                var reservaData = new
+                {
+                    fecha_reserva = reserva.FechaReserva,
+                    fecha_servicio = reserva.FechaServicio,
+                    estado = reserva.Estado,
+                    comentarios = reserva.Comentarios,
+                    usuario_id = reserva.UsuarioId,
+                    mascota_id = reserva.MascotaId,
+                    servicio_id = reserva.ServicioId
+                };
+
+                var json = JsonSerializer.Serialize(reservaData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
+                var response = await _httpClient.PostAsync(url, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+                    var createdReserva = JsonSerializer.Deserialize<List<Reserva>>(responseJson);
+                    return createdReserva?.FirstOrDefault()?.Id.ToString() ?? "OK";
+                }
+
+                return $"Error: {response.StatusCode}";
+            }
+            catch (Exception ex)
+            {
+                return $"Exception: {ex.Message}";
+            }
+        }
+
+        public async Task<string> SubirComprobanteAsync(Comprobante comprobante, Stream fileStream, string fileName)
+        {
+            try
+            {
+                // Subir el archivo a Supabase Storage
+                var storageUrl = _supabaseUrl.Replace("/rest/v1",
+                    $"/storage/v1/object/comprobantes/{comprobante.UsuarioId}/{fileName}");
+
+                using var content = new StreamContent(fileStream);
+                content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _supabaseApiKey);
+
+                var storageResponse = await _httpClient.PostAsync(storageUrl, content);
+
+                if (!storageResponse.IsSuccessStatusCode)
+                {
+                    return $"Error al subir archivo: {await storageResponse.Content.ReadAsStringAsync()}";
+                }
+
+                // Crear el registro en la tabla comprobante
+                var comprobanteUrl = $"{_supabaseUrl}/comprobante";
+                var comprobanteData = new
+                {
+                    descripcion = comprobante.Descripcion,
+                    fecha_subida = DateTime.UtcNow,
+                    url_archivo = $"{_supabaseUrl.Replace("/rest/v1", "")}/storage/v1/object/public/comprobantes/{comprobante.UsuarioId}/{fileName}",
+                    estado = "Pendiente",
+                    usuario_id = comprobante.UsuarioId,
+                    reserva_id = comprobante.ReservaId
+                };
+
+                var json = JsonSerializer.Serialize(comprobanteData);
+                var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _httpClient.DefaultRequestHeaders.Remove("Prefer");
+                _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
+
+                var response = await _httpClient.PostAsync(comprobanteUrl, stringContent);
+                return response.IsSuccessStatusCode ? "OK" : $"Error: {await response.Content.ReadAsStringAsync()}";
+            }
+            catch (Exception ex)
+            {
+                return $"Exception: {ex.Message}";
+            }
+        }
+
+        public async Task<Servicio?> ObtenerServicioPorIdAsync(int servicioId)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/servicio?id=eq.{servicioId}";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var servicios = JsonSerializer.Deserialize<List<Servicio>>(json, options);
+                return servicios?.FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<Mascota?> ObtenerMascotaPorIdAsync(int mascotaId)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/mascota?id=eq.{mascotaId}";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var mascotas = JsonSerializer.Deserialize<List<Mascota>>(json, options);
+                return mascotas?.FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<Plan>?> ObtenerPlanesAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/plan";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Plan>>(json, options);
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
     }

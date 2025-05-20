@@ -42,7 +42,7 @@
                             <Label Text="$100 / Valor a cancelar" FontAttributes="Bold" />
                         </VerticalStackLayout>
 
-                        <Button x:Name="btnAñadir1"
+                        <Button x:Name="btnPlan1"
                         Text="AÑADIR"
                         BackgroundColor="Orange"
                         TextColor="White"
@@ -50,7 +50,7 @@
                         CornerRadius="5"
                         Margin="10,0,0,0"
                         Grid.Column="1"
-                        Clicked="btnAñadir1_Clicked"  />
+                        Clicked="btnPlan1_Clicked"  />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -81,7 +81,7 @@
                             <Label Text="COMPLETO/mes" FontAttributes="Bold" />
                         </VerticalStackLayout>
 
-                        <Button x:Name="btnAñadir2"
+                        <Button x:Name="btnPlan2"
                         Text="AÑADIR"    
                         BackgroundColor="Orange"
                         TextColor="White"
@@ -89,7 +89,7 @@
                         CornerRadius="5"
                         Margin="10,0,0,0"
                         Grid.Column="1"
-                        Clicked="btnAñadir2_Clicked"/>
+                        Clicked="btnPlan2_Clicked"/>
                     </Grid>
                 </VerticalStackLayout>
             </Border>

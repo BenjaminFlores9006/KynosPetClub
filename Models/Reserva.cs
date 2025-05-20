@@ -25,4 +25,11 @@ public class Reserva
 
     [JsonPropertyName("servicio_id")]
     public int ServicioId { get; set; }
+
+    // Propiedades de navegación
+    [JsonIgnore]
+    public Servicio Servicio { get; set; }
+
+    [JsonIgnore]
+    public Mascota Mascota { get; set; }
 }
