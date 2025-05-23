@@ -10,6 +10,9 @@ public partial class vPerfil : ContentPage
     private Usuario _usuario;
     public ObservableCollection<Mascota> Mascotas { get; set; } = new();
 
+    // Propiedad para binding del Usuario al BottomNavBar
+    public Usuario Usuario => _usuario;
+
     public vPerfil(Usuario usuario)
     {
         InitializeComponent();

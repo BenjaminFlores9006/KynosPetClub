@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Controls.BottomNavBar">
+
+    <Grid BackgroundColor="#B9F5F2" Padding="10,5" HeightRequest="70">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Inicio -->
+        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center" VerticalOptions="Center">
+            <ImageButton Source="home_icon.png"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnInicio"
+                         Clicked="btnInicio_Clicked"/>
+            <Label Text="Inicio"
+                   FontSize="10"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Reservar -->
+        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
+            <ImageButton Source="calendar_icon.png"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnReservar"
+                         Clicked="btnReservar_Clicked"/>
+            <Label Text="Reservar"
+                   FontSize="10"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Pagos -->
+        <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center" VerticalOptions="Center">
+            <ImageButton Source="money_icon.png"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnPagos"
+                         Clicked="btnPagos_Clicked"/>
+            <Label Text="Pagos"
+                   FontSize="10"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Membresía -->
+        <VerticalStackLayout Grid.Column="3" HorizontalOptions="Center" VerticalOptions="Center">
+            <ImageButton Source="member_icon.png"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnMembresia"
+                         Clicked="btnMembresia_Clicked"/>
+            <Label Text="Membresía"
+                   FontSize="10"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Historial -->
+        <VerticalStackLayout Grid.Column="4" HorizontalOptions="Center" VerticalOptions="Center">
+            <ImageButton Source="history_icon.png"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnHistorial"
+                         Clicked="btnHistorial_Clicked"/>
+            <Label Text="Historial"
+                   FontSize="10"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+
+        <!-- Perfil -->
+        <VerticalStackLayout Grid.Column="5" HorizontalOptions="Center" VerticalOptions="Center">
+            <ImageButton Source="profile_icon.png"
+                         HorizontalOptions="Center"
+                         HeightRequest="25" WidthRequest="25"
+                         BackgroundColor="Transparent"
+                         x:Name="btnPerfil"
+                         Clicked="btnPerfil_Clicked"/>
+            <Label Text="Perfil"
+                   FontSize="10"
+                   TextColor="Black"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+    </Grid>
+</ContentView>

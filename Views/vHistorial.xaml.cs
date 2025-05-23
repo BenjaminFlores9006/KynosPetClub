@@ -8,14 +8,18 @@ public partial class vHistorial : ContentPage
 {
     private readonly ApiService _apiService;
     private readonly Usuario _usuario;
+
     public ObservableCollection<Reserva> Reservas { get; set; } = new();
+
+    // Propiedad para binding del Usuario al BottomNavBar
+    public Usuario Usuario => _usuario;
+
     public vHistorial(Usuario usuario)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _apiService = new ApiService();
         _usuario = usuario;
         BindingContext = this;
-
         CargarReservas();
     }
 
@@ -45,7 +49,6 @@ public partial class vHistorial : ContentPage
         {
             var filtro = button.Text.ToLower();
             var reservas = await _apiService.ObtenerReservasUsuarioAsync(_usuario.Id.Value);
-
             if (reservas != null)
             {
                 Reservas.Clear();
@@ -56,7 +59,6 @@ public partial class vHistorial : ContentPage
                     "cancelados" => reservas.Where(r => r.Estado == "cancelado"),
                     _ => reservas
                 };
-
                 foreach (var reserva in reservasFiltradas.OrderByDescending(r => r.FechaServicio))
                 {
                     Reservas.Add(reserva);

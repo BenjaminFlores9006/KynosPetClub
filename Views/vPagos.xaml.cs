@@ -14,20 +14,23 @@ public partial class vPagos : ContentPage
     private string _comprobanteFileName;
 
     public List<string> MetodosPago { get; } = new List<string>
-        {
-            "Transferencia bancaria",
-            "Depósito",
-            "Efectivo"
-        };
+    {
+        "Transferencia bancaria",
+        "Depósito",
+        "Efectivo"
+    };
+
+    // Propiedad para binding del Usuario al BottomNavBar
+    public Usuario Usuario => _usuario;
+
     public vPagos(Usuario usuario, Servicio servicio, Mascota mascota, DateTime fechaServicio)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _usuario = usuario;
         _servicio = servicio;
         _mascota = mascota;
         _fechaServicio = fechaServicio;
         _apiService = new ApiService();
-
         BindingContext = this;
         CargarDatosPago();
     }

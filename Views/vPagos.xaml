@@ -1,96 +1,99 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:KynosPetClub.Controls"
              x:Class="KynosPetClub.Views.vPagos"
              Title="Pagos"
              BackgroundColor="#F5F9F9">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
-            <Label Text="Resumen de Pago"
-                FontSize="24"
-                FontAttributes="Bold"
-                TextColor="#4B8A8B"
-                HorizontalOptions="Center"/>
+    <Grid RowDefinitions="*,Auto">
+        <!-- Contenido principal -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <Label Text="Resumen de Pago"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    TextColor="#4B8A8B"
+                    HorizontalOptions="Center"/>
 
-            <Frame BorderColor="#A5C9CA"
-                CornerRadius="10"
-                Padding="10"
-                BackgroundColor="White">
-                <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="15">
-                    <Image Grid.RowSpan="4"
-                        x:Name="imgServicio"
-                        Aspect="AspectFill"
-                        HeightRequest="80"
-                        WidthRequest="80"/>
+                <Frame BorderColor="#A5C9CA"
+                    CornerRadius="10"
+                    Padding="10"
+                    BackgroundColor="White">
+                    <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="15">
+                        <Image Grid.RowSpan="4"
+                            x:Name="imgServicio"
+                            Aspect="AspectFill"
+                            HeightRequest="80"
+                            WidthRequest="80"/>
+                        <Label Grid.Column="1"
+                            x:Name="lblNombreServicio"
+                            FontAttributes="Bold"
+                            TextColor="#4B8A8B"
+                            FontSize="16"/>
+                        <Label Grid.Column="1" Grid.Row="1"
+                            x:Name="lblDescripcionServicio"
+                            TextColor="Black"
+                            FontSize="14"/>
+                        <Label Grid.Column="1" Grid.Row="2"
+                            Text="Fecha y hora"
+                            TextColor="#4B8A8B"
+                            FontAttributes="Bold"/>
+                        <Label Grid.Column="1" Grid.Row="3"
+                            x:Name="lblFechaHora"
+                            TextColor="Black"
+                            FontSize="14"/>
+                    </Grid>
+                </Frame>
 
-                    <Label Grid.Column="1"
-                        x:Name="lblNombreServicio"
-                        FontAttributes="Bold"
-                        TextColor="#4B8A8B"
-                        FontSize="16"/>
+                <Label Text="Método de pago"
+                    TextColor="#4B8A8B"
+                    FontAttributes="Bold"/>
+                <Picker x:Name="pkMetodoPago"
+                    Title="Selecciona método de pago"
+                    ItemsSource="{Binding MetodosPago}"
+                    BackgroundColor="#FFFFF0"/>
 
-                    <Label Grid.Column="1" Grid.Row="1"
-                        x:Name="lblDescripcionServicio"
-                        TextColor="Black"
-                        FontSize="14"/>
+                <Label Text="Subir comprobante"
+                    TextColor="#4B8A8B"
+                    FontAttributes="Bold"/>
+                <Button x:Name="btnSeleccionarComprobante"
+                    Text="Tomar foto del comprobante"
+                    BackgroundColor="#A5C9CA"
+                    TextColor="White"
+                    CornerRadius="5"
+                    Clicked="btnSeleccionarComprobante_Clicked"/>
+                <Image x:Name="imgComprobante"
+                    HeightRequest="150"
+                    IsVisible="False"/>
 
-                    <Label Grid.Column="1" Grid.Row="2"
-                        Text="Fecha y hora"
-                        TextColor="#4B8A8B"
-                        FontAttributes="Bold"/>
-
-                    <Label Grid.Column="1" Grid.Row="3"
-                        x:Name="lblFechaHora"
-                        TextColor="Black"
-                        FontSize="14"/>
-                </Grid>
-            </Frame>
-
-            <Label Text="Método de pago"
-                TextColor="#4B8A8B"
-                FontAttributes="Bold"/>
-
-            <Picker x:Name="pkMetodoPago"
-                Title="Selecciona método de pago"
-                ItemsSource="{Binding MetodosPago}"
-                BackgroundColor="#FFFFF0"/>
-
-            <Label Text="Subir comprobante"
-                TextColor="#4B8A8B"
-                FontAttributes="Bold"/>
-
-            <Button x:Name="btnSeleccionarComprobante"
-                Text="Tomar foto del comprobante"
-                BackgroundColor="#A5C9CA"
-                TextColor="White"
-                CornerRadius="5"
-                Clicked="btnSeleccionarComprobante_Clicked"/>
-
-            <Image x:Name="imgComprobante"
-                HeightRequest="150"
-                IsVisible="False"/>
-
-            <Label Text="Total a pagar"
-                TextColor="#4B8A8B"
-                FontAttributes="Bold"/>
-
-            <Label x:Name="lblTotal"
-                TextColor="Black"
-                FontAttributes="Bold"
-                FontSize="18"/>
-
-            <!-- Botón Pagar -->
-            <Button x:Name="btnPagar"
-                    Text="Pagar"
-                    BackgroundColor="#FFD33C"
+                <Label Text="Total a pagar"
+                    TextColor="#4B8A8B"
+                    FontAttributes="Bold"/>
+                <Label x:Name="lblTotal"
                     TextColor="Black"
                     FontAttributes="Bold"
-                    CornerRadius="10"
-                    HeightRequest="50"
-                    Clicked="btnPagar_Clicked"
-                    IsEnabled="False" />
+                    FontSize="18"/>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Botón Pagar -->
+                <Button x:Name="btnPagar"
+                        Text="Pagar"
+                        BackgroundColor="#FFD33C"
+                        TextColor="Black"
+                        FontAttributes="Bold"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        Clicked="btnPagar_Clicked"
+                        IsEnabled="False" />
+
+                <!-- Espaciado adicional para evitar que el último elemento quede muy cerca de la barra -->
+                <BoxView HeightRequest="10" Color="Transparent"/>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Barra de navegación inferior -->
+        <controls:BottomNavBar x:Name="bottomNavBar" 
+                               Grid.Row="1" 
+                               Usuario="{Binding Usuario}"/>
+    </Grid>
 </ContentPage>

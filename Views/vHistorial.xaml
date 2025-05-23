@@ -1,72 +1,77 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:KynosPetClub.Controls"
              x:Class="KynosPetClub.Views.vHistorial"
              Title="Historial">
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
-            <Label Text="Historial"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   TextColor="Black"
-                   HorizontalOptions="Center"/>
 
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                <Button x:Name="btnFiltroSeleccionado"
-                    Text="Todos"
-                        BackgroundColor="#F7F7F7"
-                        TextColor="Black"
-                        CornerRadius="20"
-                        Padding="20,5"
-                        Clicked="btnFiltroSeleccionado_Clicked"/>
+    <Grid RowDefinitions="*,Auto">
+        <!-- Contenido principal -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <Label Text="Historial"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="Black"
+                       HorizontalOptions="Center"/>
 
-                <Button Text="Completados"
-                        BackgroundColor="#F7F7F7"
-                        TextColor="Black"
-                        CornerRadius="20"
-                        Padding="20,5"
-                        Clicked="btnFiltroSeleccionado_Clicked"/>
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
+                    <Button x:Name="btnFiltroSeleccionado"
+                            Text="Todos"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="20"
+                            Padding="20,5"
+                            Clicked="btnFiltroSeleccionado_Clicked"/>
+                    <Button Text="Completados"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="20"
+                            Padding="20,5"
+                            Clicked="btnFiltroSeleccionado_Clicked"/>
+                    <Button Text="Cancelados"
+                            BackgroundColor="#F7F7F7"
+                            TextColor="Black"
+                            CornerRadius="20"
+                            Padding="20,5"
+                            Clicked="btnFiltroSeleccionado_Clicked"/>
+                </HorizontalStackLayout>
 
-                <Button Text="Cancelados"
-                        BackgroundColor="#F7F7F7"
-                        TextColor="Black"
-                        CornerRadius="20"
-                        Padding="20,5"
-                        Clicked="btnFiltroSeleccionado_Clicked"/>
-            </HorizontalStackLayout>
+                <CollectionView ItemsSource="{Binding Reservas}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="15" CornerRadius="10" HasShadow="True">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <Label Text="{Binding Servicio.Nombre}"
+                                           Grid.Column="0"
+                                           Grid.Row="0"
+                                           FontSize="16"
+                                           FontAttributes="Bold"/>
+                                    <Label Text="{Binding Estado}"
+                                           Grid.Column="1"
+                                           Grid.Row="0"
+                                           TextColor="{Binding Estado, Converter={StaticResource EstadoToColorConverter}}"
+                                           FontAttributes="Bold"/>
+                                    <Label Text="{Binding FechaServicio, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                           Grid.Column="0"
+                                           Grid.Row="1"
+                                           TextColor="Gray"/>
+                                    <Label Text="{Binding Comentarios}"
+                                           Grid.Column="0"
+                                           Grid.Row="2"
+                                           FontAttributes="Italic"
+                                           TextColor="Gray"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
 
-            <CollectionView ItemsSource="{Binding Reservas}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Frame Padding="15" CornerRadius="10" HasShadow="True">
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                <Label Text="{Binding Servicio.Nombre}"
-                                       Grid.Column="0"
-                                       Grid.Row="0"
-                                       FontSize="16"
-                                       FontAttributes="Bold"/>
-
-                                <Label Text="{Binding Estado}"
-                                       Grid.Column="1"
-                                       Grid.Row="0"
-                                       TextColor="{Binding Estado, Converter={StaticResource EstadoToColorConverter}}"
-                                       FontAttributes="Bold"/>
-
-                                <Label Text="{Binding FechaServicio, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
-                                       Grid.Column="0"
-                                       Grid.Row="1"
-                                       TextColor="Gray"/>
-
-                                <Label Text="{Binding Comentarios}"
-                                       Grid.Column="0"
-                                       Grid.Row="2"
-                                       FontAttributes="Italic"
-                                       TextColor="Gray"/>
-                            </Grid>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
-    </ScrollView>
+        <!-- Barra de navegación inferior -->
+        <controls:BottomNavBar x:Name="bottomNavBar" 
+                               Grid.Row="1" 
+                               Usuario="{Binding Usuario}"/>
+    </Grid>
 </ContentPage>

@@ -9,14 +9,18 @@ public partial class vReserva : ContentPage
     private readonly Usuario _usuario;
     private readonly List<Mascota> _mascotas;
     private readonly ApiService _apiService;
+
+    // Propiedad para binding del Usuario al BottomNavBar
+    public Usuario Usuario => _usuario;
+
     public vReserva(Servicio servicio, Usuario usuario, List<Mascota> mascotas)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _servicio = servicio;
         _usuario = usuario;
         _mascotas = mascotas;
         _apiService = new ApiService();
-
+        BindingContext = this;
         CargarDatosServicio();
         CargarMascotas();
     }
@@ -26,7 +30,6 @@ public partial class vReserva : ContentPage
         lblNombreServicio.Text = _servicio.Nombre;
         lblPrecioServicio.Text = $"{_servicio.Precio:C}";
         lblDescripcionServicio.Text = _servicio.Descripcion;
-        
 
         // Opcional: Cambiar imagen según el servicio
         imgServicio.Source = _servicio.Nombre switch
@@ -86,7 +89,6 @@ public partial class vReserva : ContentPage
             btnAgendar.Text = "Procesando...";
 
             var resultado = await _apiService.CrearReservaAsync(reserva);
-
             if (resultado != "ERROR")
             {
                 await Navigation.PushAsync(new vPagos(_usuario, _servicio, mascotaSeleccionada, fechaServicio));
