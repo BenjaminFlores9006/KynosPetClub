@@ -4,70 +4,156 @@
              xmlns:controls="clr-namespace:KynosPetClub.Controls"
              x:Class="KynosPetClub.Views.vReserva"
              BackgroundColor="White"
-             Title="Reservas">
-
+             Title="Reservas Activas">
     <Grid RowDefinitions="*,Auto">
         <!-- Contenido principal -->
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Padding="20" Spacing="15">
-                <Label Text="Reservas"
+                <Label Text="Mis Reservas Activas"
                        FontSize="20"
                        FontAttributes="Bold"
                        HorizontalTextAlignment="Center"/>
 
-                <Frame CornerRadius="10" HasShadow="True" Padding="10">
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
-                        <Image x:Name="imgServicio"
-                               Grid.RowSpan="3"
-                               HeightRequest="80"
-                               WidthRequest="80"
-                               Aspect="AspectFill"/>
+                <!-- Indicador de carga -->
+                <ActivityIndicator x:Name="loadingIndicator"
+                                 IsVisible="False"
+                                 IsRunning="False"
+                                 Color="#2E7D32"
+                                 HeightRequest="50"/>
 
-                        <Label x:Name="lblNombreServicio"
-                               Grid.Column="1"
-                               FontSize="18"
-                               FontAttributes="Bold"/>
+                <!-- Lista de reservas -->
+                <CollectionView x:Name="cvReservas"
+                              ItemsSource="{Binding ReservasActivas}"
+                              EmptyView="No tienes reservas activas">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame CornerRadius="10" 
+                                   HasShadow="True" 
+                                   Padding="15"
+                                   Margin="0,5,0,5"
+                                   BackgroundColor="White">
+                                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" 
+                                      ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="15"
+                                      RowSpacing="8">
 
-                        <Label x:Name="lblPrecioServicio"
-                               Grid.Column="1"
-                               Grid.Row="1"
-                               FontSize="16"
-                               TextColor="#2E7D32"/>
+                                    <!-- Imagen del servicio -->
+                                    <Image Grid.RowSpan="4"
+                                           Source="{Binding ImagenServicio}"
+                                           HeightRequest="80"
+                                           WidthRequest="80"
+                                           Aspect="AspectFill"
+                                           VerticalOptions="Center"/>
 
-                        <Label x:Name="lblDescripcionServicio"
-                               Grid.Column="1"
-                               Grid.Row="2"
-                               FontSize="14"
-                               TextColor="Gray"/>
-                    </Grid>
-                </Frame>
+                                    <!-- Estado de la reserva -->
+                                    <Frame Grid.Column="2"
+                                           BackgroundColor="{Binding ColorEstado}"
+                                           CornerRadius="15"
+                                           Padding="8,4,8,4"
+                                           HasShadow="False">
+                                        <Label Text="{Binding Estado}"
+                                               TextColor="White"
+                                               FontSize="12"
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center"/>
+                                    </Frame>
 
-                <Label Text="Selecciona la fecha:"
-                       FontSize="14"/>
-                <DatePicker x:Name="dpFecha"
-                            MinimumDate="{Binding Today}"
-                            Date="{Binding Today}"/>
+                                    <!-- Información del servicio -->
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Servicio.Nombre}"
+                                           FontSize="18"
+                                           FontAttributes="Bold"
+                                           TextColor="#2E7D32"/>
 
-                <Label Text="Selecciona la hora:"
-                       FontSize="14"/>
-                <TimePicker x:Name="tpHora"/>
+                                    <Label Grid.Column="1" Grid.Row="1"
+                                           Text="{Binding Servicio.Precio, StringFormat='{0:C}'}"
+                                           FontSize="16"
+                                           TextColor="#4CAF50"
+                                           FontAttributes="Bold"/>
 
-                <Label Text="Selecciona tu mascota:"
-                       FontSize="14"/>
-                <Picker x:Name="pkMascotas"
-                        Title="Selecciona una mascota"
-                        ItemDisplayBinding="{Binding Nombre}"/>
+                                    <!-- Información de la mascota -->
+                                    <Label Grid.Column="1" Grid.Row="2"
+                                           Text="{Binding MascotaInfo}"
+                                           FontSize="14"
+                                           TextColor="#666"/>
 
-                <Button x:Name="btnAgendar"
-                        Text="Agendar cita"
-                        BackgroundColor="#FFC107"
-                        TextColor="Black"
-                        CornerRadius="5"
-                        HeightRequest="50"
-                        Margin="0,30,0,0"
-                        Clicked="btnAgendar_Clicked"/>
+                                    <!-- Fecha del servicio -->
+                                    <Label Grid.Column="1" Grid.Row="3"
+                                           Text="{Binding FechaServicioFormateada}"
+                                           FontSize="14"
+                                           TextColor="#333"
+                                           FontAttributes="Bold"/>
 
-                <!-- Espaciado adicional para evitar que el último elemento quede muy cerca de la barra -->
+                                    <!-- Botones de acción -->
+                                    <StackLayout Grid.ColumnSpan="3" Grid.Row="4"
+                                               Orientation="Horizontal"
+                                               HorizontalOptions="End"
+                                               Spacing="10"
+                                               Margin="0,10,0,0">
+
+                                        <Button x:Name="btnVerDetalles"
+                                                Text="Ver Detalles"
+                                                BackgroundColor="#2196F3"
+                                                TextColor="White"
+                                                CornerRadius="5"
+                                                FontSize="12"
+                                                Padding="15,8,15,8"
+                                                CommandParameter="{Binding .}"
+                                                Clicked="OnVerDetallesClicked"/>
+
+                                        <Button x:Name="btnCancelar"
+                                                Text="Cancelar"
+                                                BackgroundColor="#F44336"
+                                                TextColor="White"
+                                                CornerRadius="5"
+                                                FontSize="12"
+                                                Padding="15,8,15,8"
+                                                CommandParameter="{Binding .}"
+                                                Clicked="OnCancelarReservaClicked"
+                                                IsVisible="{Binding PuedeCancelarse}"/>
+                                    </StackLayout>
+
+                                    <!-- Comentarios si existen -->
+                                    <Label Grid.ColumnSpan="3" Grid.Row="5"
+                                           Text="{Binding Comentarios}"
+                                           FontSize="12"
+                                           TextColor="#888"
+                                           IsVisible="{Binding TieneComentarios}"
+                                           Margin="0,5,0,0"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Mensaje cuando no hay reservas -->
+                <StackLayout x:Name="emptyStateLayout"
+                           IsVisible="False"
+                           VerticalOptions="CenterAndExpand"
+                           Padding="20">
+                    <Label Text="📅"
+                           FontSize="60"
+                           HorizontalTextAlignment="Center"
+                           TextColor="#CCC"/>
+                    <Label Text="No tienes reservas activas"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"
+                           TextColor="#666"
+                           Margin="0,10,0,5"/>
+                    <Label Text="Cuando tengas servicios pendientes o en curso, aparecerán aquí"
+                           FontSize="14"
+                           HorizontalTextAlignment="Center"
+                           TextColor="#999"
+                           Margin="0,0,0,20"/>
+                    <Button Text="Ver Servicios Disponibles"
+                            BackgroundColor="#4CAF50"
+                            TextColor="White"
+                            CornerRadius="5"
+                            Clicked="OnVerServiciosClicked"/>
+                </StackLayout>
+
+                <!-- Espaciado adicional -->
                 <BoxView HeightRequest="15" Color="Transparent"/>
             </VerticalStackLayout>
         </ScrollView>

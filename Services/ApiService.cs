@@ -47,6 +47,7 @@ namespace KynosPetClub.Services
                     fechanac = usuario.fechanac,
                     correo = usuario.correo,
                     contraseña = usuario.contraseña,
+                    foto = usuario.foto,
                     auth_id = usuario.AuthId,
                     rol_id = usuario.RolId ?? 2, // Por defecto rol de cliente
                     plan_id = usuario.PlanId
@@ -176,6 +177,7 @@ namespace KynosPetClub.Services
                     nombre = usuario.nombre,
                     apellido = usuario.apellido,
                     fechanac = usuario.fechanac.ToString("yyyy-MM-dd"),
+                    foto = usuario.foto,
                     contraseña = usuario.contraseña
                 };
 
@@ -368,6 +370,57 @@ namespace KynosPetClub.Services
             catch (Exception ex)
             {
                 return $"Exception: {ex.Message}";
+            }
+        }
+
+        // Agregar este método a tu clase ApiService existente
+
+        public async Task<bool> ActualizarReservaAsync(Reserva reserva)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/reserva?id=eq.{reserva.Id}";
+
+                // Validar que el estado sea uno de los válidos
+                var estadosValidos = new[] { "Pendiente", "En curso", "Completado", "Cancelado" };
+                if (!estadosValidos.Contains(reserva.Estado))
+                {
+                    Console.WriteLine($"Estado inválido: {reserva.Estado}");
+                    return false;
+                }
+
+                var reservaData = new
+                {
+                    fecha_servicio = reserva.FechaServicio.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    estado = reserva.Estado,
+                    comentarios = reserva.Comentarios
+                };
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                };
+
+                var json = JsonSerializer.Serialize(reservaData, options);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                Console.WriteLine($"Actualizando reserva {reserva.Id}: {json}");
+
+                var response = await _httpClient.PatchAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error al actualizar reserva: {errorContent}");
+                }
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar reserva: {ex.Message}");
+                return false;
             }
         }
 

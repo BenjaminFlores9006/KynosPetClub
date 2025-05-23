@@ -42,24 +42,23 @@ public partial class BottomNavBar : ContentView
         {
             try
             {
-                var servicios = await _apiService.ObtenerServiciosAsync();
-                if (servicios != null && servicios.Any())
+                // Verificar si el usuario tiene mascotas antes de navegar
+                var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(Usuario.Id.Value);
+                if (mascotas == null || !mascotas.Any())
                 {
-                    var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(Usuario.Id.Value);
-                    if (mascotas == null || !mascotas.Any())
-                    {
-                        await Application.Current.MainPage.DisplayAlert("Advertencia",
-                            "No tienes mascotas registradas. Por favor agrega una mascota primero.", "OK");
-                        // Navegar a perfil para agregar mascota
-                        await Application.Current.MainPage.Navigation.PushAsync(new Views.vPerfil(Usuario));
-                        return;
-                    }
-                    await Application.Current.MainPage.Navigation.PushAsync(new Views.vReserva(servicios.First(), Usuario, mascotas));
+                    await Application.Current.MainPage.DisplayAlert("Advertencia",
+                        "No tienes mascotas registradas. Por favor agrega una mascota primero.", "OK");
+                    // Navegar a perfil para agregar mascota
+                    await Application.Current.MainPage.Navigation.PushAsync(new Views.vPerfil(Usuario));
+                    return;
                 }
+
+                // Navegar a la vista de reservas (ahora solo necesita el usuario)
+                await Application.Current.MainPage.Navigation.PushAsync(new Views.vReserva(Usuario));
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Error", $"Error al cargar reservas: {ex.Message}", "OK");
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al verificar mascotas: {ex.Message}", "OK");
             }
         }
     }

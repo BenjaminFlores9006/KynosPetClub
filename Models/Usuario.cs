@@ -24,6 +24,9 @@ namespace KynosPetClub.Models
         [JsonPropertyName("contraseña")]
         public string contraseña { get; set; }
 
+        [JsonPropertyName("foto")]
+        public string foto { get; set; }
+
         [JsonPropertyName("auth_id")]
         public string? AuthId { get; set; }
 

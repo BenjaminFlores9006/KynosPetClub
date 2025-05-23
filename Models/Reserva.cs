@@ -26,10 +26,34 @@ public class Reserva
     [JsonPropertyName("servicio_id")]
     public int ServicioId { get; set; }
 
-    // Propiedades de navegación
-    [JsonIgnore]
+    // Propiedades de navegación para datos relacionados de Supabase
+    [JsonPropertyName("servicio")]
     public Servicio Servicio { get; set; }
 
-    [JsonIgnore]
+    [JsonPropertyName("mascota")]
     public Mascota Mascota { get; set; }
+
+    // Enum para estados válidos
+    public static class EstadosValidos
+    {
+        public const string Pendiente = "Pendiente";
+        public const string EnCurso = "En curso";
+        public const string Completado = "Completado";
+        public const string Cancelado = "Cancelado";
+    }
+
+    // Método helper para validar estado
+    public bool TieneEstadoValido()
+    {
+        return Estado == EstadosValidos.Pendiente ||
+               Estado == EstadosValidos.EnCurso ||
+               Estado == EstadosValidos.Completado ||
+               Estado == EstadosValidos.Cancelado;
+    }
+
+    // Método helper para verificar si es una reserva activa
+    public bool EsReservaActiva()
+    {
+        return Estado == EstadosValidos.Pendiente || Estado == EstadosValidos.EnCurso;
+    }
 }

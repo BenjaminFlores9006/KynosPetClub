@@ -1,111 +1,201 @@
 using KynosPetClub.Models;
 using KynosPetClub.Services;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace KynosPetClub.Views;
 
-public partial class vReserva : ContentPage
+public partial class vReserva : ContentPage, INotifyPropertyChanged
 {
-    private readonly Servicio _servicio;
     private readonly Usuario _usuario;
-    private readonly List<Mascota> _mascotas;
     private readonly ApiService _apiService;
+    private ObservableCollection<ReservaViewModel> _reservasActivas;
 
-    // Propiedad para binding del Usuario al BottomNavBar
+    // Propiedades para binding
     public Usuario Usuario => _usuario;
+    public ObservableCollection<ReservaViewModel> ReservasActivas
+    {
+        get => _reservasActivas;
+        set
+        {
+            _reservasActivas = value;
+            OnPropertyChanged();
+        }
+    }
 
-    public vReserva(Servicio servicio, Usuario usuario, List<Mascota> mascotas)
+    public vReserva(Usuario usuario)
     {
         InitializeComponent();
-        _servicio = servicio;
         _usuario = usuario;
-        _mascotas = mascotas;
         _apiService = new ApiService();
+        ReservasActivas = new ObservableCollection<ReservaViewModel>();
         BindingContext = this;
-        CargarDatosServicio();
-        CargarMascotas();
     }
 
-    private void CargarDatosServicio()
+    protected override async void OnAppearing()
     {
-        lblNombreServicio.Text = _servicio.Nombre;
-        lblPrecioServicio.Text = $"{_servicio.Precio:C}";
-        lblDescripcionServicio.Text = _servicio.Descripcion;
-
-        // Opcional: Cambiar imagen según el servicio
-        imgServicio.Source = _servicio.Nombre switch
-        {
-            "Veterinaria" => "veterinaria.jpg",
-            "Peluqueria" => "peluqueria.png",
-            "Guarderia" => "guarderia.png",
-            "Hospedaje" => "hospedaje.png",
-            _ => "servicio_generico.png"
-        };
-
-        dpFecha.MinimumDate = DateTime.Today;
-        dpFecha.Date = DateTime.Today;
+        base.OnAppearing();
+        await CargarReservasActivas();
     }
 
-    private async void CargarMascotas()
+    private async Task CargarReservasActivas()
     {
-        pkMascotas.ItemsSource = _mascotas;
-        if (_mascotas.Any())
-        {
-            pkMascotas.SelectedIndex = 0;
-        }
-    }
-
-    private async void btnAgendar_Clicked(object sender, EventArgs e)
-    {
-        if (pkMascotas.SelectedItem == null)
-        {
-            await DisplayAlert("Error", "Por favor selecciona una mascota", "OK");
-            return;
-        }
-
-        var mascotaSeleccionada = (Mascota)pkMascotas.SelectedItem;
-        var fechaServicio = dpFecha.Date.Add(tpHora.Time);
-
-        if (fechaServicio < DateTime.Now)
-        {
-            await DisplayAlert("Error", "No puedes seleccionar una fecha/hora en el pasado", "OK");
-            return;
-        }
-
-        var reserva = new Reserva
-        {
-            FechaReserva = DateTime.Now,
-            FechaServicio = fechaServicio,
-            Estado = "pendiente",
-            UsuarioId = _usuario.Id.Value,
-            MascotaId = mascotaSeleccionada.Id,
-            ServicioId = _servicio.Id,
-            Servicio = _servicio,
-            Mascota = mascotaSeleccionada
-        };
-
         try
         {
-            btnAgendar.IsEnabled = false;
-            btnAgendar.Text = "Procesando...";
+            loadingIndicator.IsVisible = true;
+            loadingIndicator.IsRunning = true;
+            emptyStateLayout.IsVisible = false;
 
-            var resultado = await _apiService.CrearReservaAsync(reserva);
-            if (resultado != "ERROR")
+            var reservas = await _apiService.ObtenerReservasUsuarioAsync(_usuario.Id.Value);
+
+            if (reservas != null)
             {
-                await Navigation.PushAsync(new vPagos(_usuario, _servicio, mascotaSeleccionada, fechaServicio));
+                // Filtrar solo reservas activas (Pendiente y En curso)
+                var reservasActivas = reservas
+                    .Where(r => r.Estado == "Pendiente" || r.Estado == "En curso")
+                    .OrderBy(r => r.FechaServicio)
+                    .ToList();
+
+                ReservasActivas.Clear();
+
+                foreach (var reserva in reservasActivas)
+                {
+                    // Cargar datos relacionados si no vienen en la consulta
+                    if (reserva.Servicio == null)
+                        reserva.Servicio = await _apiService.ObtenerServicioPorIdAsync(reserva.ServicioId);
+
+                    if (reserva.Mascota == null)
+                        reserva.Mascota = await _apiService.ObtenerMascotaPorIdAsync(reserva.MascotaId);
+
+                    ReservasActivas.Add(new ReservaViewModel(reserva));
+                }
+
+                emptyStateLayout.IsVisible = !ReservasActivas.Any();
             }
             else
             {
-                await DisplayAlert("Error", "No se pudo crear la reserva", "OK");
+                emptyStateLayout.IsVisible = true;
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Error al crear reserva: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Error al cargar reservas: {ex.Message}", "OK");
+            emptyStateLayout.IsVisible = true;
         }
         finally
         {
-            btnAgendar.IsEnabled = true;
-            btnAgendar.Text = "Agendar cita";
+            loadingIndicator.IsVisible = false;
+            loadingIndicator.IsRunning = false;
         }
     }
+
+    private async void OnVerDetallesClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is ReservaViewModel reservaVM)
+        {
+            var detalles = $"Servicio: {reservaVM.Servicio.Nombre}\n" +
+                          $"Mascota: {reservaVM.MascotaInfo}\n" +
+                          $"Fecha: {reservaVM.FechaServicioFormateada}\n" +
+                          $"Estado: {reservaVM.Estado}\n" +
+                          $"Precio: {reservaVM.Servicio.Precio:C}";
+
+            if (!string.IsNullOrEmpty(reservaVM.Comentarios))
+                detalles += $"\nComentarios: {reservaVM.Comentarios}";
+
+            await DisplayAlert("Detalles de la Reserva", detalles, "OK");
+        }
+    }
+
+    private async void OnCancelarReservaClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is ReservaViewModel reservaVM)
+        {
+            var confirmar = await DisplayAlert("Confirmar Cancelación",
+                $"¿Estás seguro de que deseas cancelar la reserva de {reservaVM.Servicio.Nombre}?",
+                "Sí", "No");
+
+            if (confirmar)
+            {
+                try
+                {
+                    // Actualizar el estado de la reserva a "Cancelado"
+                    var reservaActualizada = reservaVM.ReservaOriginal;
+                    reservaActualizada.Estado = "Cancelado";
+
+                    var resultado = await _apiService.ActualizarReservaAsync(reservaActualizada);
+
+                    if (resultado)
+                    {
+                        await DisplayAlert("Éxito", "Reserva cancelada correctamente", "OK");
+                        await CargarReservasActivas(); // Recargar la lista
+                    }
+                    else
+                    {
+                        await DisplayAlert("Error", "No se pudo cancelar la reserva", "OK");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"Error al cancelar reserva: {ex.Message}", "OK");
+                }
+            }
+        }
+    }
+
+    private async void OnVerServiciosClicked(object sender, EventArgs e)
+    {
+        // Navegar de vuelta a la pantalla principal de servicios
+        await Navigation.PopToRootAsync();
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
+
+// ViewModel para las reservas con propiedades calculadas
+public class ReservaViewModel
+{
+    public Reserva ReservaOriginal { get; set; }
+
+    public ReservaViewModel(Reserva reserva)
+    {
+        ReservaOriginal = reserva;
+    }
+
+    public int Id => ReservaOriginal.Id;
+    public string Estado => ReservaOriginal.Estado;
+    public DateTime FechaServicio => ReservaOriginal.FechaServicio;
+    public Servicio Servicio => ReservaOriginal.Servicio;
+    public Mascota Mascota => ReservaOriginal.Mascota;
+    public string Comentarios => ReservaOriginal.Comentarios;
+
+    public string MascotaInfo => $"{Mascota?.Nombre} ({Mascota?.Especie})";
+
+    public string FechaServicioFormateada =>
+        $"{FechaServicio:dddd, dd MMMM yyyy} a las {FechaServicio:HH:mm}";
+
+    public string ImagenServicio => Servicio?.Nombre switch
+    {
+        "Veterinaria" => "veterinaria.jpg",
+        "Peluqueria" => "peluqueria.png",
+        "Guarderia" => "guarderia.png",
+        "Hospedaje" => "hospedaje.png",
+        _ => "servicio_generico.png"
+    };
+
+    public Color ColorEstado => Estado switch
+    {
+        "Pendiente" => Colors.Orange,
+        "En curso" => Colors.Blue,
+        "Completado" => Colors.Green,
+        "Cancelado" => Colors.Red,
+        _ => Colors.Gray
+    };
+
+    public bool PuedeCancelarse => Estado == "Pendiente";
+
+    public bool TieneComentarios => !string.IsNullOrEmpty(Comentarios);
 }

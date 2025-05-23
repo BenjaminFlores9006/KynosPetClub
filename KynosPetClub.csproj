@@ -82,6 +82,9 @@
 	  <MauiXaml Update="Views\vEditarUsuario.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Views\vHacerReserva.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\vHistorial.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
