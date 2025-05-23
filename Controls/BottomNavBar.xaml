@@ -36,7 +36,7 @@
                          BackgroundColor="Transparent"
                          x:Name="btnReservar"
                          Clicked="btnReservar_Clicked"/>
-            <Label Text="Reservar"
+            <Label Text="Reservas"
                    FontSize="10"
                    TextColor="Black"
                    HorizontalOptions="Center"

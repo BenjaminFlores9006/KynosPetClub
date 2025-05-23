@@ -10,21 +10,10 @@
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Padding="10" Spacing="20">
 
-                <Label Text="Planes"
+                <Label Text="Membresias"
                        FontSize="20"
                        VerticalOptions="Center"
                        HorizontalOptions="Center"/>
-
-                <HorizontalStackLayout Padding="5" Spacing="5">
-                    <Picker x:Name="filtro" 
-                            Title="Filtro" 
-                            WidthRequest="40" 
-                            TextColor="Black" />
-                    <Picker x:Name="clasificar" 
-                            Title="Clasificar" 
-                            WidthRequest="80" 
-                            TextColor="Black"/>
-                </HorizontalStackLayout>
 
                 <Border Stroke="#800080" 
                         StrokeThickness="1" 
