@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vEditarUsuario"
+             Title="Editar Perfil"
+             BackgroundColor="White">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Título -->
+            <Label Text="Editar tu Perfil"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   TextColor="Black"
+                   Margin="0,0,0,20"/>
+
+            <!-- Avatar del usuario -->
+            <Frame CornerRadius="75" 
+                   HeightRequest="150" 
+                   WidthRequest="150"
+                   HorizontalOptions="Center"
+                   HasShadow="True"
+                   Padding="0"
+                   Margin="0,0,0,20">
+                <Image Source="avatarusuario.png"
+                       Aspect="AspectFill"
+                       HeightRequest="150"
+                       WidthRequest="150"/>
+            </Frame>
+
+            <!-- Campo Nombre -->
+            <Label Text="Nombre:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="txtNombre"
+                   Placeholder="Tu nombre"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="45"
+                   Margin="0,0,0,10"/>
+
+            <!-- Campo Apellido -->
+            <Label Text="Apellido:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="txtApellido"
+                   Placeholder="Tu apellido"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="45"
+                   Margin="0,0,0,10"/>
+
+            <!-- Campo Correo (solo lectura) -->
+            <Label Text="Correo electrónico:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="txtCorreo"
+                   IsReadOnly="True"
+                   BackgroundColor="#F0F0F0"
+                   TextColor="Gray"
+                   HeightRequest="45"
+                   Margin="0,0,0,10"/>
+
+            <!-- Campo Fecha de Nacimiento -->
+            <Label Text="Fecha de nacimiento:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <DatePicker x:Name="dtpFechaNacimiento"
+                        Format="dd/MM/yyyy"
+                        TextColor="Black"
+                        BackgroundColor="White"
+                        HeightRequest="45"
+                        Margin="0,0,0,30"/>
+
+            <!-- Sección de cambio de contraseña -->
+            <Frame BackgroundColor="#F7F7F7"
+                   Padding="15"
+                   CornerRadius="10"
+                   HasShadow="False"
+                   Margin="0,0,0,20">
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="Cambiar Contraseña (Opcional)"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#333333"/>
+
+                    <Label Text="Contraseña actual:" 
+                           FontSize="14" 
+                           TextColor="#333333"/>
+                    <Entry x:Name="txtPasswordActual"
+                           Placeholder="Contraseña actual"
+                           IsPassword="True"
+                           BackgroundColor="White"
+                           TextColor="Black"
+                           PlaceholderColor="Gray"
+                           HeightRequest="40"/>
+
+                    <Label Text="Nueva contraseña:" 
+                           FontSize="14" 
+                           TextColor="#333333"/>
+                    <Entry x:Name="txtPasswordNueva"
+                           Placeholder="Nueva contraseña"
+                           IsPassword="True"
+                           BackgroundColor="White"
+                           TextColor="Black"
+                           PlaceholderColor="Gray"
+                           HeightRequest="40"/>
+
+                    <Label Text="Confirmar nueva contraseña:" 
+                           FontSize="14" 
+                           TextColor="#333333"/>
+                    <Entry x:Name="txtPasswordConfirmar"
+                           Placeholder="Confirmar nueva contraseña"
+                           IsPassword="True"
+                           BackgroundColor="White"
+                           TextColor="Black"
+                           PlaceholderColor="Gray"
+                           HeightRequest="40"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Botones de acción -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        x:Name="btnGuardar"
+                        Text="Guardar Cambios"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        Clicked="btnGuardar_Clicked"/>
+
+                <Button Grid.Column="1"
+                        x:Name="btnCancelar"
+                        Text="Cancelar"
+                        BackgroundColor="#FF5252"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        Clicked="btnCancelar_Clicked"/>
+            </Grid>
+
+            <!-- Mensaje de estado -->
+            <Label x:Name="lblMensaje"
+                   FontSize="14"
+                   TextColor="Red"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,10,0,0"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

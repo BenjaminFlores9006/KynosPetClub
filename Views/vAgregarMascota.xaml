@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vAgregarMascota"
+             Title="Agregar Mascota"
+             BackgroundColor="White">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Título -->
+            <Label Text="Agregar Nueva Mascota"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   TextColor="Black"
+                   Margin="0,0,0,20"/>
+
+            <!-- Foto de la mascota -->
+            <Frame CornerRadius="75" 
+                   HeightRequest="150" 
+                   WidthRequest="150"
+                   HorizontalOptions="Center"
+                   HasShadow="True"
+                   Padding="0">
+                <Image x:Name="imgMascota"
+                       Source="default_pet.png"
+                       Aspect="AspectFill"
+                       HeightRequest="150"
+                       WidthRequest="150"/>
+            </Frame>
+
+            <!-- Botón para agregar foto -->
+            <Button x:Name="btnAgregarFoto"
+                    Text="📷 Agregar Foto"
+                    BackgroundColor="#9EFFAC"
+                    TextColor="Black"
+                    CornerRadius="10"
+                    HeightRequest="45"
+                    FontAttributes="Bold"
+                    Clicked="btnAgregarFoto_Clicked"
+                    Margin="0,0,0,20"/>
+
+            <!-- Campo Nombre -->
+            <Label Text="Nombre de la mascota:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="txtNombre"
+                   Placeholder="¿Cómo se llama tu mascota?"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="45"
+                   Margin="0,0,0,10"/>
+
+            <!-- Campo Especie -->
+            <Label Text="Especie:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <Picker x:Name="pickerEspecie"
+                    Title="Selecciona la especie"
+                    BackgroundColor="White"
+                    TextColor="Black"
+                    HeightRequest="45"
+                    Margin="0,0,0,10">
+                <Picker.Items>
+                    <x:String>Perro</x:String>
+                    <x:String>Gato</x:String>
+                    <x:String>Conejo</x:String>
+                    <x:String>Hámster</x:String>
+                    <x:String>Ave</x:String>
+                    <x:String>Otro</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- Campo Raza -->
+            <Label Text="Raza:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <Entry x:Name="txtRaza"
+                   Placeholder="Raza de tu mascota (opcional)"
+                   BackgroundColor="White"
+                   TextColor="Black"
+                   PlaceholderColor="Gray"
+                   HeightRequest="45"
+                   Margin="0,0,0,10"/>
+
+            <!-- Campo Fecha de Nacimiento -->
+            <Label Text="Fecha de nacimiento:" 
+                   FontSize="14" 
+                   TextColor="#333333"
+                   FontAttributes="Bold"/>
+            <DatePicker x:Name="dtpFechaNacimiento"
+                        Format="dd/MM/yyyy"
+                        TextColor="Black"
+                        BackgroundColor="White"
+                        HeightRequest="45"
+                        Margin="0,0,0,20"/>
+
+            <!-- Botones de acción -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        x:Name="btnGuardar"
+                        Text="Guardar Mascota"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        Clicked="btnGuardar_Clicked"/>
+
+                <Button Grid.Column="1"
+                        x:Name="btnCancelar"
+                        Text="Cancelar"
+                        BackgroundColor="#FF5252"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        Clicked="btnCancelar_Clicked"/>
+            </Grid>
+
+            <!-- Mensaje de estado -->
+            <Label x:Name="lblMensaje"
+                   FontSize="14"
+                   TextColor="Red"
+                   HorizontalTextAlignment="Center"
+                   Margin="0,10,0,0"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

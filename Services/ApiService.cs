@@ -169,16 +169,35 @@ namespace KynosPetClub.Services
             try
             {
                 string url = $"{_supabaseUrl}/usuario?id=eq.{usuario.Id}";
+
+                // Crear objeto con todos los campos que se pueden actualizar
                 var usuarioData = new
                 {
                     nombre = usuario.nombre,
-                    apellido = usuario.apellido
+                    apellido = usuario.apellido,
+                    fechanac = usuario.fechanac.ToString("yyyy-MM-dd"),
+                    contraseña = usuario.contraseña
                 };
 
-                var json = JsonSerializer.Serialize(usuarioData);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = true
+                };
+
+                var json = JsonSerializer.Serialize(usuarioData, options);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+                Console.WriteLine($"Actualizando usuario {usuario.Id}: {json}");
+
                 var response = await _httpClient.PatchAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error al actualizar usuario: {errorContent}");
+                }
+
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)

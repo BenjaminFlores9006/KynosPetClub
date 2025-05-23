@@ -1,7 +1,6 @@
 using KynosPetClub.Models;
 using KynosPetClub.Services;
 using System.Collections.ObjectModel;
-using System.Globalization;
 
 namespace KynosPetClub.Views;
 
@@ -10,9 +9,10 @@ public partial class vPerfil : ContentPage
     private readonly ApiService _apiService;
     private Usuario _usuario;
     public ObservableCollection<Mascota> Mascotas { get; set; } = new();
+
     public vPerfil(Usuario usuario)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         _apiService = new ApiService();
         _usuario = usuario;
         BindingContext = this;
@@ -21,28 +21,40 @@ public partial class vPerfil : ContentPage
         CargarMascotas();
     }
 
-    private void CargarDatosUsuario()
+    protected override async void OnAppearing()
     {
-        lblNombre.Text = $"{_usuario.nombre} {_usuario.apellido}";
-        lblCorreo.Text = _usuario.correo;
-        lblFechaNac.Text = _usuario.fechanac.ToString("dd/MM/yyyy");
+        base.OnAppearing();
+        // Recargar datos cuando la página aparece (por si se editó algo)
+        await CargarMascotas();
+        CargarDatosUsuario();
     }
 
-    private async void CargarMascotas()
+    private void CargarDatosUsuario()
+    {
+        lblSaludo.Text = $"¡Hola, {_usuario.nombre}!";
+        lblNombre.Text = $"{_usuario.nombre} {_usuario.apellido}";
+        lblCorreo.Text = _usuario.correo;
+        lblFechaNac.Text = $"Nacimiento: {_usuario.fechanac:dd/MM/yyyy}";
+    }
+
+    private async Task CargarMascotas()
     {
         try
         {
-            var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(_usuario.Id.Value);
-            if (mascotas != null)
+            if (_usuario.Id.HasValue)
             {
-                Mascotas.Clear();
-                foreach (var mascota in mascotas)
+                var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(_usuario.Id.Value);
+                if (mascotas != null)
                 {
-                    Mascotas.Add(mascota);
-                }
+                    Mascotas.Clear();
+                    foreach (var mascota in mascotas)
+                    {
+                        Mascotas.Add(mascota);
+                    }
 
-                // Actualizar UI
-                cvMascotas.ItemsSource = Mascotas;
+                    // Actualizar UI
+                    cvMascotas.ItemsSource = Mascotas;
+                }
             }
         }
         catch (Exception ex)
@@ -53,25 +65,29 @@ public partial class vPerfil : ContentPage
 
     private async void btnEditarPerfil_Clicked(object sender, EventArgs e)
     {
-        var nuevoNombre = await DisplayPromptAsync("Editar", "Nuevo nombre:", initialValue: _usuario.nombre);
-        var nuevoApellido = await DisplayPromptAsync("Editar", "Nuevo apellido:", initialValue: _usuario.apellido);
-
-        if (!string.IsNullOrEmpty(nuevoNombre) && !string.IsNullOrEmpty(nuevoApellido))
+        // Verificar que solo el usuario logueado pueda editar
+        if (_usuario?.Id != null)
         {
-            _usuario.nombre = nuevoNombre;
-            _usuario.apellido = nuevoApellido;
+            await Navigation.PushAsync(new vEditarUsuario(_usuario));
+        }
+        else
+        {
+            await DisplayAlert("Error", "No se puede editar el perfil en este momento", "OK");
+        }
+    }
 
-            // Llamada REAL al API para actualizar
-            var resultado = await _apiService.ActualizarUsuarioAsync(_usuario);
-
-            if (resultado)
+    private async void btnEditarMascota_Clicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is Mascota mascota)
+        {
+            // Verificar que la mascota pertenece al usuario logueado
+            if (mascota.UsuarioId == _usuario.Id)
             {
-                CargarDatosUsuario();
-                await DisplayAlert("Éxito", "Perfil actualizado en la base de datos", "OK");
+                await Navigation.PushAsync(new vEditarMascota(mascota, _usuario));
             }
             else
             {
-                await DisplayAlert("Error", "No se pudo actualizar el perfil", "OK");
+                await DisplayAlert("Error", "No tienes permisos para editar esta mascota", "OK");
             }
         }
     }
@@ -80,18 +96,37 @@ public partial class vPerfil : ContentPage
     {
         if (sender is Button button && button.CommandParameter is Mascota mascota)
         {
-            bool confirmar = await DisplayAlert("Confirmar", $"¿Eliminar a {mascota.Nombre}?", "Sí", "No");
+            // Verificar que la mascota pertenece al usuario logueado
+            if (mascota.UsuarioId != _usuario.Id)
+            {
+                await DisplayAlert("Error", "No tienes permisos para eliminar esta mascota", "OK");
+                return;
+            }
+
+            bool confirmar = await DisplayAlert(
+                "Confirmar eliminación",
+                $"¿Estás seguro de que deseas eliminar a {mascota.Nombre}?",
+                "Sí, eliminar",
+                "Cancelar");
+
             if (confirmar)
             {
-                var resultado = await _apiService.EliminarMascotaAsync(mascota.Id);
-                if (resultado)
+                try
                 {
-                    Mascotas.Remove(mascota);
-                    await DisplayAlert("Éxito", "Mascota eliminada", "OK");
+                    var resultado = await _apiService.EliminarMascotaAsync(mascota.Id);
+                    if (resultado)
+                    {
+                        Mascotas.Remove(mascota);
+                        await DisplayAlert("Éxito", $"{mascota.Nombre} ha sido eliminada", "OK");
+                    }
+                    else
+                    {
+                        await DisplayAlert("Error", "No se pudo eliminar la mascota", "OK");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await DisplayAlert("Error", "No se pudo eliminar la mascota", "OK");
+                    await DisplayAlert("Error", $"Error al eliminar: {ex.Message}", "OK");
                 }
             }
         }
@@ -99,101 +134,37 @@ public partial class vPerfil : ContentPage
 
     private async void btnAgregarMascota_Clicked(object sender, EventArgs e)
     {
-        var nombre = await DisplayPromptAsync("Nueva Mascota", "Nombre:");
-        var especie = await DisplayPromptAsync("Nueva Mascota", "Especie:");
-        var raza = await DisplayPromptAsync("Nueva Mascota", "Raza:");
-
-        // Selector de fecha mejorado
-        var fechaNac = await SeleccionarFechaNacimiento(DateTime.Now);
-
-        if (!string.IsNullOrEmpty(nombre) && !string.IsNullOrEmpty(especie) && fechaNac != null)
+        if (_usuario?.Id != null)
         {
-            var nuevaMascota = new Mascota
-            {
-                Nombre = nombre,
-                Especie = especie,
-                Raza = raza,
-                FechaNacimiento = fechaNac.Value,
-                UsuarioId = _usuario.Id.Value
-            };
-
-            var resultado = await _apiService.AgregarMascotaAsync(nuevaMascota);
-            if (resultado == "OK")
-            {
-                Mascotas.Add(nuevaMascota);
-                await DisplayAlert("Éxito", "Mascota agregada", "OK");
-            }
-            else
-            {
-                await DisplayAlert("Error", $"No se pudo agregar: {resultado}", "OK");
-            }
+            await Navigation.PushAsync(new vAgregarMascota(_usuario));
         }
         else
         {
-            await DisplayAlert("Error", "Debes completar todos los campos", "OK");
-        }
-    }
-
-    private async Task<DateTime?> SeleccionarFechaNacimiento(DateTime fechaDefault)
-    {
-        try
-        {
-            // Primero intentamos con un DatePicker
-            var fecha = await DisplayPromptAsync(
-                "Fecha de Nacimiento",
-                "Ingrese la fecha (dd/MM/yyyy):",
-                initialValue: fechaDefault.ToString("dd/MM/yyyy"),
-                keyboard: Keyboard.Numeric);
-
-            if (DateTime.TryParseExact(fecha, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fechaResult))
-            {
-                return fechaResult;
-            }
-
-            await DisplayAlert("Error", "Formato de fecha incorrecto. Use dd/MM/yyyy", "OK");
-            return null;
-        }
-        catch
-        {
-            return null;
+            await DisplayAlert("Error", "No se puede agregar mascota en este momento", "OK");
         }
     }
 
     private async void btnCerrarSesion_Clicked(object sender, EventArgs e)
     {
-        SecureStorage.RemoveAll();
-        await Navigation.PushAsync(new vLogIn());
-    }
+        bool confirmar = await DisplayAlert(
+            "Cerrar Sesión",
+            "¿Estás seguro de que deseas cerrar sesión?",
+            "Sí",
+            "No");
 
-    private async void btnEditarMascota_Clicked(object sender, EventArgs e)
-    {
-        if (sender is Button button && button.CommandParameter is Mascota mascota)
+        if (confirmar)
         {
-            var nuevoNombre = await DisplayPromptAsync("Editar Mascota", "Nuevo nombre:", initialValue: mascota.Nombre);
-            var nuevaEspecie = await DisplayPromptAsync("Editar Mascota", "Nueva especie:", initialValue: mascota.Especie);
-            var nuevaRaza = await DisplayPromptAsync("Editar Mascota", "Nueva raza:", initialValue: mascota.Raza);
-
-            var nuevaFecha = await SeleccionarFechaNacimiento(mascota.FechaNacimiento);
-
-            if (!string.IsNullOrEmpty(nuevoNombre) && !string.IsNullOrEmpty(nuevaEspecie) && nuevaFecha != null)
+            try
             {
-                mascota.Nombre = nuevoNombre;
-                mascota.Especie = nuevaEspecie;
-                mascota.Raza = nuevaRaza;
-                mascota.FechaNacimiento = nuevaFecha.Value;
+                // Limpiar datos almacenados
+                SecureStorage.RemoveAll();
 
-                var resultado = await _apiService.ActualizarMascotaAsync(mascota);
-                if (resultado)
-                {
-                    // Actualizar la lista
-                    var index = Mascotas.IndexOf(mascota);
-                    Mascotas[index] = mascota;
-                    await DisplayAlert("Éxito", "Mascota actualizada", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "No se pudo actualizar la mascota", "OK");
-                }
+                // Navegar a la página de login y limpiar la pila de navegación
+                Application.Current.MainPage = new NavigationPage(new vLogIn());
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Error al cerrar sesión: {ex.Message}", "OK");
             }
         }
     }
