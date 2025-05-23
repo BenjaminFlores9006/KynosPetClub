@@ -1,3 +1,5 @@
+﻿// Agrega este código completo a tu vReserva.xaml.cs:
+
 using KynosPetClub.Models;
 using KynosPetClub.Services;
 using System.Collections.ObjectModel;
@@ -9,19 +11,11 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
 {
     private readonly Usuario _usuario;
     private readonly ApiService _apiService;
-    private ObservableCollection<ReservaViewModel> _reservasActivas;
 
-    // Propiedades para binding
+    public ObservableCollection<ReservaViewModel> ReservasActivas { get; set; }
+
+    // Propiedad para binding del Usuario al BottomNavBar
     public Usuario Usuario => _usuario;
-    public ObservableCollection<ReservaViewModel> ReservasActivas
-    {
-        get => _reservasActivas;
-        set
-        {
-            _reservasActivas = value;
-            OnPropertyChanged();
-        }
-    }
 
     public vReserva(Usuario usuario)
     {
@@ -29,123 +23,202 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
         _usuario = usuario;
         _apiService = new ApiService();
         ReservasActivas = new ObservableCollection<ReservaViewModel>();
+
         BindingContext = this;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await CargarReservasActivas();
+        await CargarReservas();
     }
 
-    private async Task CargarReservasActivas()
+    private async Task CargarReservas()
     {
         try
         {
+            // Mostrar indicador de carga
+            loadingSection.IsVisible = true;
             loadingIndicator.IsVisible = true;
             loadingIndicator.IsRunning = true;
             emptyStateLayout.IsVisible = false;
 
-            var reservas = await _apiService.ObtenerReservasUsuarioAsync(_usuario.Id.Value);
+            // Obtener datos en paralelo
+            var reservasTask = _apiService.ObtenerReservasUsuarioAsync(_usuario.Id.Value);
+            var serviciosTask = _apiService.ObtenerServiciosAsync();
+            var mascotasTask = _apiService.ObtenerMascotasUsuarioAsync(_usuario.Id.Value);
+            var comprobantesTask = _apiService.ObtenerComprobantesUsuarioAsync(_usuario.Id.Value);
 
-            if (reservas != null)
+            await Task.WhenAll(reservasTask, serviciosTask, mascotasTask, comprobantesTask);
+
+            var reservas = await reservasTask ?? new List<Reserva>();
+            var servicios = await serviciosTask ?? new List<Servicio>();
+            var mascotas = await mascotasTask ?? new List<Mascota>();
+            var comprobantes = await comprobantesTask ?? new List<Comprobante>();
+
+            // Filtrar solo reservas activas
+            var reservasActivas = reservas
+                .Where(r => r.EsReservaActiva() || r.Estado == "Pendiente")
+                .OrderBy(r => r.FechaServicio)
+                .ToList();
+
+            // Crear ViewModels
+            var reservasViewModel = new List<ReservaViewModel>();
+
+            foreach (var reserva in reservasActivas)
             {
-                // Filtrar solo reservas activas (Pendiente y En curso)
-                var reservasActivas = reservas
-                    .Where(r => r.Estado == "Pendiente" || r.Estado == "En curso")
-                    .OrderBy(r => r.FechaServicio)
-                    .ToList();
+                var servicio = servicios.FirstOrDefault(s => s.Id == reserva.ServicioId);
+                var mascota = mascotas.FirstOrDefault(m => m.Id == reserva.MascotaId);
 
-                ReservasActivas.Clear();
+                // Verificar si tiene comprobante
+                var tieneComprobante = comprobantes.Any(c => c.ReservaId == reserva.Id);
 
-                foreach (var reserva in reservasActivas)
+                var viewModel = new ReservaViewModel
                 {
-                    // Cargar datos relacionados si no vienen en la consulta
-                    if (reserva.Servicio == null)
-                        reserva.Servicio = await _apiService.ObtenerServicioPorIdAsync(reserva.ServicioId);
+                    Id = reserva.Id,
+                    FechaServicio = reserva.FechaServicio,
+                    FechaServicioFormateada = reserva.FechaServicio.ToString("dddd, dd/MM/yyyy 'a las' HH:mm"),
+                    Estado = reserva.Estado,
+                    Comentarios = reserva.Comentarios,
+                    Servicio = servicio,
+                    MascotaInfo = mascota != null ? $"{mascota.Nombre} ({mascota.Especie})" : "Mascota desconocida",
+                    ColorEstado = ObtenerColorEstado(reserva.Estado),
 
-                    if (reserva.Mascota == null)
-                        reserva.Mascota = await _apiService.ObtenerMascotaPorIdAsync(reserva.MascotaId);
+                    // ✅ CORREGIDO: El botón cancelar se muestra siempre EXCEPTO si ya está cancelado
+                    PuedeCancelarse = reserva.Estado != "Cancelado" && reserva.Estado != "Completado",
 
-                    ReservasActivas.Add(new ReservaViewModel(reserva));
-                }
+                    TieneComentarios = !string.IsNullOrWhiteSpace(reserva.Comentarios),
 
-                emptyStateLayout.IsVisible = !ReservasActivas.Any();
+                    // Mostrar "Pendiente de pago" si no tiene comprobante
+                    MostrarPendientePago = !tieneComprobante,
+                    ReservaOriginal = reserva
+                };
+
+                reservasViewModel.Add(viewModel);
             }
-            else
+
+            // Actualizar la colección
+            ReservasActivas.Clear();
+            foreach (var reserva in reservasViewModel)
             {
-                emptyStateLayout.IsVisible = true;
+                ReservasActivas.Add(reserva);
             }
+
+            // Mostrar estado vacío si no hay reservas
+            emptyStateLayout.IsVisible = !ReservasActivas.Any();
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", $"Error al cargar reservas: {ex.Message}", "OK");
-            emptyStateLayout.IsVisible = true;
         }
         finally
         {
+            // Ocultar indicador de carga
+            loadingSection.IsVisible = false;
             loadingIndicator.IsVisible = false;
             loadingIndicator.IsRunning = false;
         }
     }
 
+    private Color ObtenerColorEstado(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => Color.FromArgb("#FF9800"), // Naranja
+            "En curso" => Color.FromArgb("#2196F3"),  // Azul
+            "Completado" => Color.FromArgb("#4CAF50"), // Verde
+            "Cancelado" => Color.FromArgb("#F44336"),  // Rojo
+            _ => Color.FromArgb("#9E9E9E") // Gris por defecto
+        };
+    }
+
     private async void OnVerDetallesClicked(object sender, EventArgs e)
     {
-        if (sender is Button button && button.CommandParameter is ReservaViewModel reservaVM)
+        try
         {
-            var detalles = $"Servicio: {reservaVM.Servicio.Nombre}\n" +
-                          $"Mascota: {reservaVM.MascotaInfo}\n" +
-                          $"Fecha: {reservaVM.FechaServicioFormateada}\n" +
-                          $"Estado: {reservaVM.Estado}\n" +
-                          $"Precio: {reservaVM.Servicio.Precio:C}";
+            var button = sender as Button;
+            var reserva = button?.CommandParameter as ReservaViewModel;
 
-            if (!string.IsNullOrEmpty(reservaVM.Comentarios))
-                detalles += $"\nComentarios: {reservaVM.Comentarios}";
+            if (reserva != null)
+            {
+                string detalles = $"📋 Detalles de la Reserva\n\n" +
+                    $"🏥 Servicio: {reserva.Servicio?.Nombre ?? "N/A"}\n" +
+                    $"💰 Precio: {(reserva.Servicio?.Precio ?? 0):C}\n" + // CORREGIDO: Formato de precio
+                    $"🐕 Mascota: {reserva.MascotaInfo}\n" +
+                    $"📅 Fecha: {reserva.FechaServicioFormateada}\n" +
+                    $"📊 Estado: {reserva.Estado}\n";
 
-            await DisplayAlert("Detalles de la Reserva", detalles, "OK");
+                if (reserva.MostrarPendientePago)
+                {
+                    detalles += $"⚠️ Estado de Pago: Pendiente de pago\n";
+                }
+
+                if (reserva.TieneComentarios)
+                {
+                    detalles += $"📝 Comentarios: {reserva.Comentarios}\n";
+                }
+
+                await DisplayAlert("Detalles", detalles, "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Error al mostrar detalles: {ex.Message}", "OK");
         }
     }
 
     private async void OnCancelarReservaClicked(object sender, EventArgs e)
     {
-        if (sender is Button button && button.CommandParameter is ReservaViewModel reservaVM)
+        try
         {
-            var confirmar = await DisplayAlert("Confirmar Cancelaci�n",
-                $"�Est�s seguro de que deseas cancelar la reserva de {reservaVM.Servicio.Nombre}?",
-                "S�", "No");
+            var button = sender as Button;
+            var reserva = button?.CommandParameter as ReservaViewModel;
 
-            if (confirmar)
+            if (reserva != null)
             {
-                try
-                {
-                    // Actualizar el estado de la reserva a "Cancelado"
-                    var reservaActualizada = reservaVM.ReservaOriginal;
-                    reservaActualizada.Estado = "Cancelado";
+                bool confirmar = await DisplayAlert("⚠️ Cancelar Reserva",
+                    $"¿Estás seguro de que deseas cancelar esta reserva?\n\n" +
+                    $"🏥 Servicio: {reserva.Servicio?.Nombre}\n" +
+                    $"📅 Fecha: {reserva.FechaServicioFormateada}\n\n" +
+                    $"Esta acción no se puede deshacer.",
+                    "Sí, cancelar", "No");
 
-                    var resultado = await _apiService.ActualizarReservaAsync(reservaActualizada);
+                if (confirmar)
+                {
+                    // Usar tu método existente ActualizarReservaAsync
+                    var reservaParaActualizar = reserva.ReservaOriginal;
+                    reservaParaActualizar.Estado = "Cancelado";
+
+                    var resultado = await _apiService.ActualizarReservaAsync(reservaParaActualizar);
 
                     if (resultado)
                     {
-                        await DisplayAlert("�xito", "Reserva cancelada correctamente", "OK");
-                        await CargarReservasActivas(); // Recargar la lista
+                        await DisplayAlert("✅ Cancelada", "La reserva ha sido cancelada exitosamente.", "OK");
+                        await CargarReservas(); // Recargar lista
                     }
                     else
                     {
-                        await DisplayAlert("Error", "No se pudo cancelar la reserva", "OK");
+                        await DisplayAlert("Error", "No se pudo cancelar la reserva. Inténtalo nuevamente.", "OK");
                     }
                 }
-                catch (Exception ex)
-                {
-                    await DisplayAlert("Error", $"Error al cancelar reserva: {ex.Message}", "OK");
-                }
             }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Error al cancelar reserva: {ex.Message}", "OK");
         }
     }
 
     private async void OnVerServiciosClicked(object sender, EventArgs e)
     {
-        // Navegar de vuelta a la pantalla principal de servicios
-        await Navigation.PopToRootAsync();
+        try
+        {
+            await Navigation.PushAsync(new vInicio(_usuario));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Error al navegar: {ex.Message}", "OK");
+        }
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -155,47 +228,19 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
     }
 }
 
-// ViewModel para las reservas con propiedades calculadas
+// ViewModel para mostrar reservas en la UI
 public class ReservaViewModel
 {
+    public int Id { get; set; }
+    public DateTime FechaServicio { get; set; }
+    public string FechaServicioFormateada { get; set; }
+    public string Estado { get; set; }
+    public string Comentarios { get; set; }
+    public Servicio Servicio { get; set; }
+    public string MascotaInfo { get; set; }
+    public Color ColorEstado { get; set; }
+    public bool PuedeCancelarse { get; set; }
+    public bool TieneComentarios { get; set; }
+    public bool MostrarPendientePago { get; set; } // NUEVA PROPIEDAD
     public Reserva ReservaOriginal { get; set; }
-
-    public ReservaViewModel(Reserva reserva)
-    {
-        ReservaOriginal = reserva;
-    }
-
-    public int Id => ReservaOriginal.Id;
-    public string Estado => ReservaOriginal.Estado;
-    public DateTime FechaServicio => ReservaOriginal.FechaServicio;
-    public Servicio Servicio => ReservaOriginal.Servicio;
-    public Mascota Mascota => ReservaOriginal.Mascota;
-    public string Comentarios => ReservaOriginal.Comentarios;
-
-    public string MascotaInfo => $"{Mascota?.Nombre} ({Mascota?.Especie})";
-
-    public string FechaServicioFormateada =>
-        $"{FechaServicio:dddd, dd MMMM yyyy} a las {FechaServicio:HH:mm}";
-
-    public string ImagenServicio => Servicio?.Nombre switch
-    {
-        "Veterinaria" => "veterinaria.jpg",
-        "Peluqueria" => "peluqueria.png",
-        "Guarderia" => "guarderia.png",
-        "Hospedaje" => "hospedaje.png",
-        _ => "servicio_generico.png"
-    };
-
-    public Color ColorEstado => Estado switch
-    {
-        "Pendiente" => Colors.Orange,
-        "En curso" => Colors.Blue,
-        "Completado" => Colors.Green,
-        "Cancelado" => Colors.Red,
-        _ => Colors.Gray
-    };
-
-    public bool PuedeCancelarse => Estado == "Pendiente";
-
-    public bool TieneComentarios => !string.IsNullOrEmpty(Comentarios);
 }

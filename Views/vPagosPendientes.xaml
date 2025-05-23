@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:KynosPetClub.Controls"
+             x:Class="KynosPetClub.Views.vPagosPendientes"
+             Title="Pagos Pendientes"
+             BackgroundColor="#F5F9F9">
+
+    <Grid RowDefinitions="*,Auto">
+        <!-- Contenido principal -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="20">
+
+                <!-- Header -->
+                <VerticalStackLayout Spacing="10">
+                    <StackLayout Orientation="Horizontal" 
+                                 HorizontalOptions="Center"
+                                 Spacing="10">
+                        <Label Text="💳"
+                               FontSize="28"
+                               VerticalTextAlignment="Center" />
+                        <Label Text="Pagos Pendientes"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="#4B8A8B"
+                               VerticalTextAlignment="Center" />
+                    </StackLayout>
+                    <Label Text="Aquí puedes ver y gestionar tus pagos pendientes"
+                           FontSize="14"
+                           TextColor="#666"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <!-- Lista de reservas con pagos pendientes -->
+                <CollectionView x:Name="collectionViewPagosPendientes"
+                                ItemsSource="{Binding ReservasPendientesPago}"
+                                BackgroundColor="Transparent"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame BackgroundColor="White" 
+                                   CornerRadius="15" 
+                                   Padding="20" 
+                                   Margin="0,0,0,15"
+                                   HasShadow="True"
+                                   BorderColor="#E0E0E0">
+                                <VerticalStackLayout Spacing="15">
+
+                                    <!-- Header de la reserva -->
+                                    <StackLayout Orientation="Horizontal" Spacing="10">
+                                        <Label Text="🏥"
+                                               FontSize="20"
+                                               VerticalTextAlignment="Center" />
+                                        <Label Text="{Binding ServicioNombre}"
+                                               FontAttributes="Bold"
+                                               FontSize="18"
+                                               TextColor="#4B8A8B"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="FillAndExpand" />
+                                        <Frame BackgroundColor="#FF9800"
+                                               CornerRadius="10"
+                                               Padding="8,4"
+                                               HasShadow="False">
+                                            <Label Text="Pago Pendiente"
+                                                   TextColor="White"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold" />
+                                        </Frame>
+                                    </StackLayout>
+
+                                    <!-- Detalles -->
+                                    <StackLayout Spacing="8">
+                                        <StackLayout Orientation="Horizontal" Spacing="10">
+                                            <Label Text="🐕"
+                                                   FontSize="16"
+                                                   VerticalTextAlignment="Center" />
+                                            <Label Text="{Binding MascotaNombre}"
+                                                   FontSize="16"
+                                                   TextColor="#666"
+                                                   VerticalTextAlignment="Center" />
+                                        </StackLayout>
+
+                                        <StackLayout Orientation="Horizontal" Spacing="10">
+                                            <Label Text="📅"
+                                                   FontSize="16"
+                                                   VerticalTextAlignment="Center" />
+                                            <Label Text="{Binding FechaHoraFormateada}"
+                                                   FontSize="16"
+                                                   TextColor="#1976D2"
+                                                   VerticalTextAlignment="Center" />
+                                        </StackLayout>
+
+                                        <StackLayout Orientation="Horizontal" Spacing="10">
+                                            <Label Text="💰"
+                                                   FontSize="18"
+                                                   VerticalTextAlignment="Center" />
+                                            <Label Text="{Binding Precio}"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#4CAF50"
+                                                   VerticalTextAlignment="Center" />
+                                        </StackLayout>
+                                    </StackLayout>
+
+                                    <!-- Botón de pagar -->
+                                    <Button Text="💳 Realizar Pago"
+                                            BackgroundColor="#4CAF50"
+                                            TextColor="White"
+                                            CornerRadius="10"
+                                            HeightRequest="45"
+                                            FontSize="16"
+                                            FontAttributes="Bold"
+                                            Clicked="btnPagar_Clicked"
+                                            CommandParameter="{Binding}" />
+
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Mensaje cuando no hay pagos pendientes -->
+                <StackLayout x:Name="stackNoPayments"
+                           IsVisible="False"
+                           Padding="30"
+                           Spacing="20">
+
+                    <Frame BackgroundColor="White"
+                           CornerRadius="20"
+                           Padding="30"
+                           HasShadow="True"
+                           BorderColor="#E0E0E0">
+                        <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+                            <Label Text="✅"
+                                   FontSize="60"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#4CAF50" />
+
+                            <Label Text="¡Excelente!"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#4CAF50" />
+
+                            <Label Text="No hay pagos pendientes"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#333" />
+
+                            <Label Text="Todos tus pagos están al día. ¡Gracias por mantener tus servicios actualizados!"
+                                   FontSize="15"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#666" />
+
+                            <Button Text="🏠 Ir a Inicio"
+                                    BackgroundColor="#4B8A8B"
+                                    TextColor="White"
+                                    CornerRadius="12"
+                                    HeightRequest="45"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    Clicked="btnIrInicio_Clicked" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </StackLayout>
+
+                <!-- Espaciado adicional -->
+                <BoxView HeightRequest="20" Color="Transparent"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Barra de navegación inferior -->
+        <controls:BottomNavBar x:Name="bottomNavBar" 
+                               Grid.Row="1" 
+                               Usuario="{Binding Usuario}"/>
+    </Grid>
+</ContentPage>

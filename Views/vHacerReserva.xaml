@@ -2,201 +2,202 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="KynosPetClub.Views.vHacerReserva"
-             Title="Hacer Reserva"
+             Title="Agendar Reserva"
              BackgroundColor="White">
+
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
-            <!-- Header con logo -->
-            <VerticalStackLayout Spacing="10">
+        <VerticalStackLayout Padding="20" Spacing="25">
+
+            <!-- Header con logo y título -->
+            <VerticalStackLayout Spacing="15">
                 <Image Source="kynos_logo.png" 
-                       HeightRequest="120" 
-                       HorizontalOptions="Center" />
-                <Label Text="Agendar Reserva" 
-                       FontSize="24" 
+                       HeightRequest="100" 
+                       HorizontalOptions="Center"
+                       Margin="0,10,0,0" />
+                <Label Text="🐾 Agendar Nueva Cita" 
+                       FontSize="26" 
                        FontAttributes="Bold"
                        HorizontalTextAlignment="Center"
-                       TextColor="Black" />
-                <Label Text="Programa tu cita de lunes a viernes" 
+                       TextColor="#2E7D32" />
+                <Label Text="Programa tu cita según horarios de cada servicio" 
                        FontSize="14" 
                        HorizontalTextAlignment="Center"
-                       TextColor="Gray" />
+                       TextColor="#666" />
             </VerticalStackLayout>
 
-            <!-- Formulario de reserva -->
-            <Frame BackgroundColor="#F8F9FA" 
+            <!-- Información de horarios -->
+            <Frame BackgroundColor="#E8F5E8" 
                    CornerRadius="10" 
                    Padding="15" 
-                   HasShadow="True">
-                <VerticalStackLayout Spacing="15">
+                   HasShadow="False"
+                   BorderColor="#C8E6C9">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="📋 Horarios de Atención" 
+                           FontSize="16" 
+                           FontAttributes="Bold"
+                           TextColor="#2E7D32"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="🏥 Hospedaje, Guardería, Veterinaria:"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#388E3C" />
+                    <Label Text="   Lunes a Sábado: 09:00 - 17:00"
+                           FontSize="13"
+                           TextColor="#4CAF50" />
+                    <Label Text="✂️ Peluquería:"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#388E3C"
+                           Margin="0,5,0,0" />
+                    <Label Text="   Martes a Sábado: 09:00 - 16:30"
+                           FontSize="13"
+                           TextColor="#4CAF50" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Formulario principal -->
+            <Frame BackgroundColor="#F8F9FA" 
+                   CornerRadius="15" 
+                   Padding="20" 
+                   HasShadow="True"
+                   BorderColor="#E0E0E0">
+
+                <VerticalStackLayout Spacing="20">
 
                     <!-- Selección de Servicio -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Servicio" 
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="🏥 Servicio" 
                                FontAttributes="Bold" 
-                               TextColor="Black" />
-                        <Picker x:Name="pickerServicio" 
-                                Title="Selecciona un servicio"
-                                BackgroundColor="White"
-                                TextColor="Black" />
+                               FontSize="16"
+                               TextColor="#2E7D32" />
+                        <Frame BackgroundColor="White" 
+                               CornerRadius="8" 
+                               Padding="0" 
+                               HasShadow="False"
+                               BorderColor="#DDD">
+                            <Picker x:Name="pickerServicio" 
+                                    Title="Selecciona un servicio"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#333"
+                                    TitleColor="#999"
+                                    FontSize="15" />
+                        </Frame>
                     </VerticalStackLayout>
 
                     <!-- Selección de Mascota -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Mascota" 
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="🐕 Mascota" 
                                FontAttributes="Bold" 
-                               TextColor="Black" />
-                        <Picker x:Name="pickerMascota" 
-                                Title="Selecciona tu mascota"
-                                BackgroundColor="White"
-                                TextColor="Black" />
+                               FontSize="16"
+                               TextColor="#2E7D32" />
+                        <Frame BackgroundColor="White" 
+                               CornerRadius="8" 
+                               Padding="0" 
+                               HasShadow="False"
+                               BorderColor="#DDD">
+                            <Picker x:Name="pickerMascota" 
+                                    Title="Selecciona tu mascota"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#333"
+                                    TitleColor="#999"
+                                    FontSize="15" />
+                        </Frame>
                     </VerticalStackLayout>
 
                     <!-- Selección de Fecha -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Fecha" 
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="📅 Fecha" 
                                FontAttributes="Bold" 
-                               TextColor="Black" />
-                        <DatePicker x:Name="datePicker"
-                                    BackgroundColor="White"
-                                    TextColor="Black"
-                                    Format="dddd, dd/MM/yyyy"
-                                    DateSelected="DatePicker_DateSelected" />
+                               FontSize="16"
+                               TextColor="#2E7D32" />
+                        <Frame BackgroundColor="White" 
+                               CornerRadius="8" 
+                               Padding="10" 
+                               HasShadow="False"
+                               BorderColor="#DDD">
+                            <DatePicker x:Name="datePicker"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#333"
+                                        Format="dddd, dd/MM/yyyy"
+                                        FontSize="15"
+                                        DateSelected="DatePicker_DateSelected" />
+                        </Frame>
                         <Label x:Name="lblFechaInfo" 
-                               Text="Solo de lunes a viernes (excepto peluquería)"
-                               FontSize="12" 
-                               TextColor="Gray" />
+                               Text="Selecciona un servicio para ver días disponibles"
+                               FontSize="13" 
+                               TextColor="#666"
+                               HorizontalTextAlignment="Center" />
                     </VerticalStackLayout>
 
                     <!-- Selección de Hora -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Hora" 
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="🕐 Hora" 
                                FontAttributes="Bold" 
-                               TextColor="Black" />
-                        <Picker x:Name="pickerHora" 
-                                Title="Selecciona la hora"
-                                BackgroundColor="White"
-                                TextColor="Black" />
+                               FontSize="16"
+                               TextColor="#2E7D32" />
+                        <Frame BackgroundColor="White" 
+                               CornerRadius="8" 
+                               Padding="0" 
+                               HasShadow="False"
+                               BorderColor="#DDD">
+                            <Picker x:Name="pickerHora" 
+                                    Title="Selecciona la hora"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#333"
+                                    TitleColor="#999"
+                                    FontSize="15" />
+                        </Frame>
                     </VerticalStackLayout>
 
                     <!-- Observaciones -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Observaciones (Opcional)" 
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="📝 Observaciones (Opcional)" 
                                FontAttributes="Bold" 
-                               TextColor="Black" />
-                        <Editor x:Name="editorObservaciones"
-                                Placeholder="Escribe cualquier observación adicional..."
-                                HeightRequest="80"
-                                BackgroundColor="White"
-                                TextColor="Black"
-                                PlaceholderColor="Gray" />
+                               FontSize="16"
+                               TextColor="#2E7D32" />
+                        <Frame BackgroundColor="White" 
+                               CornerRadius="8" 
+                               Padding="10" 
+                               HasShadow="False"
+                               BorderColor="#DDD">
+                            <Editor x:Name="editorObservaciones"
+                                    Placeholder="Escribe cualquier observación adicional..."
+                                    HeightRequest="90"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#333"
+                                    PlaceholderColor="#999"
+                                    FontSize="14" />
+                        </Frame>
                     </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Botones de acción -->
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout Spacing="12">
                 <Button x:Name="btnGuardarReserva"
-                        Text="Agendar Reserva"
+                        Text="✅ Agendar Reserva"
                         BackgroundColor="#4CAF50"
                         TextColor="White"
-                        CornerRadius="8"
-                        HeightRequest="50"
+                        CornerRadius="12"
+                        HeightRequest="55"
                         FontAttributes="Bold"
+                        FontSize="16"
+                        Shadow="{OnPlatform iOS='True', Default='False'}"
                         Clicked="btnGuardarReserva_Clicked" />
 
                 <Button x:Name="btnLimpiarFormulario"
-                        Text="Limpiar Formulario"
+                        Text="🧹 Limpiar Formulario"
                         BackgroundColor="#FF9800"
                         TextColor="White"
-                        CornerRadius="8"
+                        CornerRadius="12"
                         HeightRequest="45"
+                        FontSize="15"
                         Clicked="btnLimpiarFormulario_Clicked" />
             </VerticalStackLayout>
 
-            <!-- Lista de reservas existentes -->
-            <VerticalStackLayout Spacing="10">
-                <Label Text="Mis Reservas" 
-                       FontSize="18" 
-                       FontAttributes="Bold"
-                       TextColor="Black" />
-
-                <CollectionView x:Name="collectionViewReservas"
-                                BackgroundColor="Transparent">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Frame BackgroundColor="White" 
-                                   CornerRadius="8" 
-                                   Padding="15" 
-                                   Margin="0,5"
-                                   HasShadow="True">
-                                <Grid ColumnDefinitions="*,Auto,Auto" 
-                                      RowDefinitions="Auto,Auto,Auto" 
-                                      ColumnSpacing="10" 
-                                      RowSpacing="5">
-
-                                    <!-- Información de la reserva -->
-                                    <Label Grid.Row="0" Grid.Column="0"
-                                           Text="{Binding ServicioNombre}"
-                                           FontAttributes="Bold"
-                                           FontSize="16"
-                                           TextColor="Black" />
-
-                                    <Label Grid.Row="1" Grid.Column="0"
-                                           Text="{Binding MascotaNombre}"
-                                           FontSize="14"
-                                           TextColor="DarkGray" />
-
-                                    <Label Grid.Row="2" Grid.Column="0"
-                                           Text="{Binding FechaHoraFormateada}"
-                                           FontSize="14"
-                                           TextColor="DarkBlue" />
-
-                                    <!-- Botón Editar -->
-                                    <Button Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
-                                            Text="Editar"
-                                            BackgroundColor="#2196F3"
-                                            TextColor="White"
-                                            CornerRadius="5"
-                                            FontSize="12"
-                                            HeightRequest="35"
-                                            WidthRequest="60"
-                                            Clicked="btnEditarReserva_Clicked"
-                                            CommandParameter="{Binding}" />
-
-                                    <!-- Botón Eliminar -->
-                                    <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
-                                            Text="Eliminar"
-                                            BackgroundColor="#F44336"
-                                            TextColor="White"
-                                            CornerRadius="5"
-                                            FontSize="12"
-                                            HeightRequest="35"
-                                            WidthRequest="70"
-                                            Clicked="btnEliminarReserva_Clicked"
-                                            CommandParameter="{Binding}" />
-
-                                    <!-- Estado de la reserva -->
-                                    <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                           Text="{Binding Estado}"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
-                                           TextColor="{Binding EstadoColor}"
-                                           HorizontalTextAlignment="End" />
-                                </Grid>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-
-                <!-- Mensaje cuando no hay reservas -->
-                <Label x:Name="lblSinReservas"
-                       Text="No tienes reservas agendadas"
-                       FontSize="14"
-                       TextColor="Gray"
-                       HorizontalTextAlignment="Center"
-                       IsVisible="False" />
-            </VerticalStackLayout>
+            <!-- Espaciado final -->
+            <BoxView HeightRequest="30" Color="Transparent"/>
 
         </VerticalStackLayout>
     </ScrollView>

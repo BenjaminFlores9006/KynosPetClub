@@ -28,10 +28,18 @@ public partial class BottomNavBar : ContentView
     {
         if (Usuario != null)
         {
-            // Verificar si ya estamos en la página de Inicio
-            if (!(Application.Current?.MainPage?.Navigation?.NavigationStack?.LastOrDefault() is vInicio))
+            try
             {
-                await Application.Current.MainPage.Navigation.PushAsync(new Views.vInicio(Usuario));
+                // Verificar si ya estamos en la página de Inicio
+                var currentPage = Application.Current?.MainPage?.Navigation?.NavigationStack?.LastOrDefault();
+                if (!(currentPage is vInicio))
+                {
+                    await Application.Current.MainPage.Navigation.PushAsync(new vInicio(Usuario));
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al navegar a Inicio: {ex.Message}", "OK");
             }
         }
     }
@@ -49,12 +57,12 @@ public partial class BottomNavBar : ContentView
                     await Application.Current.MainPage.DisplayAlert("Advertencia",
                         "No tienes mascotas registradas. Por favor agrega una mascota primero.", "OK");
                     // Navegar a perfil para agregar mascota
-                    await Application.Current.MainPage.Navigation.PushAsync(new Views.vPerfil(Usuario));
+                    await Application.Current.MainPage.Navigation.PushAsync(new vPerfil(Usuario));
                     return;
                 }
 
-                // Navegar a la vista de reservas (ahora solo necesita el usuario)
-                await Application.Current.MainPage.Navigation.PushAsync(new Views.vReserva(Usuario));
+                // Navegar a la vista de reservas
+                await Application.Current.MainPage.Navigation.PushAsync(new vReserva(Usuario));
             }
             catch (Exception ex)
             {
@@ -67,10 +75,15 @@ public partial class BottomNavBar : ContentView
     {
         if (Usuario != null)
         {
-            // Crear un servicio temporal para mostrar los pagos
-            var servicioTemp = new Servicio { Nombre = "Consulta General", Precio = 50 };
-            var mascotaTemp = new Mascota { Nombre = "Sin especificar" };
-            await Application.Current.MainPage.Navigation.PushAsync(new Views.vPagos(Usuario, servicioTemp, mascotaTemp, DateTime.Now));
+            try
+            {
+                // Navegar a una vista específica para mostrar pagos pendientes
+                await Application.Current.MainPage.Navigation.PushAsync(new vPagosPendientes(Usuario));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al navegar a Pagos: {ex.Message}", "OK");
+            }
         }
     }
 
@@ -78,7 +91,14 @@ public partial class BottomNavBar : ContentView
     {
         if (Usuario != null)
         {
-            await Application.Current.MainPage.Navigation.PushAsync(new Views.vPlanes(Usuario));
+            try
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new vPlanes(Usuario));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al navegar a Membresía: {ex.Message}", "OK");
+            }
         }
     }
 
@@ -86,7 +106,14 @@ public partial class BottomNavBar : ContentView
     {
         if (Usuario != null)
         {
-            await Application.Current.MainPage.Navigation.PushAsync(new Views.vHistorial(Usuario));
+            try
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new vHistorial(Usuario));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al navegar a Historial: {ex.Message}", "OK");
+            }
         }
     }
 
@@ -94,7 +121,14 @@ public partial class BottomNavBar : ContentView
     {
         if (Usuario != null)
         {
-            await Application.Current.MainPage.Navigation.PushAsync(new Views.vPerfil(Usuario));
+            try
+            {
+                await Application.Current.MainPage.Navigation.PushAsync(new vPerfil(Usuario));
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", $"Error al navegar a Perfil: {ex.Message}", "OK");
+            }
         }
     }
 }

@@ -3,91 +3,285 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:KynosPetClub.Controls"
              x:Class="KynosPetClub.Views.vPagos"
-             Title="Pagos"
+             Title="Realizar Pago"
              BackgroundColor="#F5F9F9">
 
     <Grid RowDefinitions="*,Auto">
         <!-- Contenido principal -->
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="20" Spacing="15">
-                <Label Text="Resumen de Pago"
-                    FontSize="24"
-                    FontAttributes="Bold"
-                    TextColor="#4B8A8B"
-                    HorizontalOptions="Center"/>
+            <VerticalStackLayout Padding="20" Spacing="20">
 
-                <Frame BorderColor="#A5C9CA"
-                    CornerRadius="10"
-                    Padding="10"
-                    BackgroundColor="White">
-                    <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="15">
-                        <Image Grid.RowSpan="4"
-                            x:Name="imgServicio"
-                            Aspect="AspectFill"
-                            HeightRequest="80"
-                            WidthRequest="80"/>
-                        <Label Grid.Column="1"
-                            x:Name="lblNombreServicio"
-                            FontAttributes="Bold"
-                            TextColor="#4B8A8B"
-                            FontSize="16"/>
-                        <Label Grid.Column="1" Grid.Row="1"
-                            x:Name="lblDescripcionServicio"
-                            TextColor="Black"
-                            FontSize="14"/>
-                        <Label Grid.Column="1" Grid.Row="2"
-                            Text="Fecha y hora"
-                            TextColor="#4B8A8B"
-                            FontAttributes="Bold"/>
-                        <Label Grid.Column="1" Grid.Row="3"
-                            x:Name="lblFechaHora"
-                            TextColor="Black"
-                            FontSize="14"/>
-                    </Grid>
+                <!-- Header -->
+                <VerticalStackLayout Spacing="10">
+                    <StackLayout Orientation="Horizontal" 
+                                 HorizontalOptions="Center"
+                                 Spacing="10">
+                        <Label Text="💳"
+                               FontSize="28"
+                               VerticalTextAlignment="Center" />
+                        <Label Text="Resumen de Pago"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="#4B8A8B"
+                               VerticalTextAlignment="Center" />
+                    </StackLayout>
+                    <Label Text="Completa tu pago para confirmar la reserva"
+                           FontSize="14"
+                           TextColor="#666"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <!-- Información del servicio -->
+                <Frame x:Name="frameServicioDetalle"
+                       BorderColor="#A5C9CA"
+                       CornerRadius="15"
+                       Padding="20"
+                       BackgroundColor="White"
+                       HasShadow="True">
+                    <VerticalStackLayout Spacing="15">
+
+                        <Label Text="📋 Detalles del Servicio"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#4B8A8B"
+                               HorizontalTextAlignment="Center" />
+
+                        <Grid ColumnDefinitions="100,*" 
+                              RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+                              ColumnSpacing="15"
+                              RowSpacing="10">
+
+                            <!-- Icono del servicio -->
+                            <Frame Grid.RowSpan="5"
+                                   BackgroundColor="#E8F4F8"
+                                   CornerRadius="50"
+                                   HeightRequest="90"
+                                   WidthRequest="90"
+                                   HasShadow="False"
+                                   Padding="0"
+                                   VerticalOptions="Center"
+                                   HorizontalOptions="Center">
+                                <Label Text="🏥"
+                                       FontSize="35"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="#4B8A8B" />
+                            </Frame>
+
+                            <!-- Información del servicio -->
+                            <Label Grid.Column="1"
+                                   x:Name="lblNombreServicio"
+                                   FontAttributes="Bold"
+                                   TextColor="#4B8A8B"
+                                   FontSize="20"
+                                   VerticalOptions="Center" />
+
+                            <Label Grid.Column="1" Grid.Row="1"
+                                   x:Name="lblDescripcionServicio"
+                                   TextColor="#666"
+                                   FontSize="15"
+                                   VerticalOptions="Center" />
+
+                            <StackLayout Grid.Column="1" Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        Spacing="8"
+                                        VerticalOptions="Center">
+                                <Label Text="📅"
+                                       FontSize="16"
+                                       VerticalTextAlignment="Center" />
+                                <Label Text="Fecha y hora"
+                                       TextColor="#4B8A8B"
+                                       FontAttributes="Bold"
+                                       FontSize="15"
+                                       VerticalTextAlignment="Center" />
+                            </StackLayout>
+
+                            <Label Grid.Column="1" Grid.Row="3"
+                                   x:Name="lblFechaHora"
+                                   TextColor="#333"
+                                   FontSize="15"
+                                   VerticalOptions="Center" />
+
+                            <StackLayout Grid.Column="1" Grid.Row="4"
+                                        Orientation="Horizontal"
+                                        Spacing="8"
+                                        VerticalOptions="Center">
+                                <Label Text="💰"
+                                       FontSize="18"
+                                       VerticalTextAlignment="Center" />
+                                <Label x:Name="lblTotal"
+                                       TextColor="#4CAF50"
+                                       FontAttributes="Bold"
+                                       FontSize="22"
+                                       VerticalTextAlignment="Center" />
+                            </StackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
                 </Frame>
 
-                <Label Text="Método de pago"
-                    TextColor="#4B8A8B"
-                    FontAttributes="Bold"/>
-                <Picker x:Name="pkMetodoPago"
-                    Title="Selecciona método de pago"
-                    ItemsSource="{Binding MetodosPago}"
-                    BackgroundColor="#FFFFF0"/>
+                <!-- Método de pago -->
+                <Frame x:Name="frameMetodoPago"
+                       BackgroundColor="White"
+                       CornerRadius="15"
+                       Padding="20"
+                       HasShadow="True"
+                       BorderColor="#E0E0E0">
+                    <VerticalStackLayout Spacing="15">
+                        <StackLayout Orientation="Horizontal"
+                                    Spacing="10"
+                                    HorizontalOptions="Center">
+                            <Label Text="💳"
+                                   FontSize="18"
+                                   VerticalTextAlignment="Center" />
+                            <Label Text="Método de pago"
+                                   TextColor="#4B8A8B"
+                                   FontAttributes="Bold"
+                                   FontSize="18"
+                                   VerticalTextAlignment="Center" />
+                        </StackLayout>
 
-                <Label Text="Subir comprobante"
-                    TextColor="#4B8A8B"
-                    FontAttributes="Bold"/>
-                <Button x:Name="btnSeleccionarComprobante"
-                    Text="Tomar foto del comprobante"
-                    BackgroundColor="#A5C9CA"
-                    TextColor="White"
-                    CornerRadius="5"
-                    Clicked="btnSeleccionarComprobante_Clicked"/>
-                <Image x:Name="imgComprobante"
-                    HeightRequest="150"
-                    IsVisible="False"/>
+                        <Frame BackgroundColor="#F8F9FA"
+                               CornerRadius="10"
+                               Padding="0"
+                               HasShadow="False"
+                               BorderColor="#DDD">
+                            <Picker x:Name="pkMetodoPago"
+                                    Title="Selecciona método de pago"
+                                    ItemsSource="{Binding MetodosPago}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#333"
+                                    TitleColor="#999"
+                                    FontSize="16" />
+                        </Frame>
+                    </VerticalStackLayout>
+                </Frame>
 
-                <Label Text="Total a pagar"
-                    TextColor="#4B8A8B"
-                    FontAttributes="Bold"/>
-                <Label x:Name="lblTotal"
-                    TextColor="Black"
-                    FontAttributes="Bold"
-                    FontSize="18"/>
+                <!-- Información bancaria -->
+                <Frame x:Name="frameDatosBancarios"
+                       BackgroundColor="#FFF3CD"
+                       CornerRadius="15"
+                       Padding="20"
+                       HasShadow="False"
+                       BorderColor="#FFEAA7">
+                    <VerticalStackLayout Spacing="10">
+                        <StackLayout Orientation="Horizontal"
+                                    Spacing="8"
+                                    HorizontalOptions="Center">
+                            <Label Text="🏦"
+                                   FontSize="18"
+                                   VerticalTextAlignment="Center" />
+                            <Label Text="Datos para Transferencia"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="#856404"
+                                   VerticalTextAlignment="Center" />
+                        </StackLayout>
+
+                        <Label Text="Banco: Banco Pichincha"
+                               FontSize="14"
+                               TextColor="#856404"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Cuenta: 2100123456"
+                               FontSize="14"
+                               TextColor="#856404"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Titular: Kynos Pet Club"
+                               FontSize="14"
+                               TextColor="#856404"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <!-- Subir comprobante -->
+                <Frame x:Name="frameComprobante"
+                       BackgroundColor="White"
+                       CornerRadius="15"
+                       Padding="20"
+                       HasShadow="True"
+                       BorderColor="#E0E0E0">
+                    <VerticalStackLayout Spacing="15">
+                        <StackLayout Orientation="Horizontal"
+                                    Spacing="10"
+                                    HorizontalOptions="Center">
+                            <Label Text="📷"
+                                   FontSize="18"
+                                   VerticalTextAlignment="Center" />
+                            <Label Text="Subir comprobante"
+                                   TextColor="#4B8A8B"
+                                   FontAttributes="Bold"
+                                   FontSize="18"
+                                   VerticalTextAlignment="Center" />
+                        </StackLayout>
+
+                        <Button x:Name="btnSeleccionarComprobante"
+                                Text="📸 Tomar foto del comprobante"
+                                BackgroundColor="#A5C9CA"
+                                TextColor="White"
+                                CornerRadius="10"
+                                HeightRequest="50"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                Clicked="btnSeleccionarComprobante_Clicked" />
+
+                        <Frame x:Name="frameComprobanteImagen"
+                               IsVisible="False"
+                               CornerRadius="10"
+                               Padding="10"
+                               BackgroundColor="#F8F9FA"
+                               HasShadow="False">
+                            <StackLayout Spacing="10">
+                                <Label Text="✅ Comprobante cargado correctamente"
+                                       TextColor="#4CAF50"
+                                       FontSize="14"
+                                       HorizontalTextAlignment="Center" />
+                                <Image x:Name="imgComprobante"
+                                       HeightRequest="200"
+                                       Aspect="AspectFit" />
+                                <Button Text="🔄 Cambiar imagen"
+                                        BackgroundColor="#FF9800"
+                                        TextColor="White"
+                                        CornerRadius="8"
+                                        FontSize="14"
+                                        HeightRequest="40"
+                                        Clicked="btnSeleccionarComprobante_Clicked" />
+                            </StackLayout>
+                        </Frame>
+                    </VerticalStackLayout>
+                </Frame>
 
                 <!-- Botón Pagar -->
                 <Button x:Name="btnPagar"
-                        Text="Pagar"
-                        BackgroundColor="#FFD33C"
-                        TextColor="Black"
+                        Text="💳 Procesar Pago"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
                         FontAttributes="Bold"
-                        CornerRadius="10"
-                        HeightRequest="50"
+                        CornerRadius="15"
+                        HeightRequest="60"
+                        FontSize="18"
                         Clicked="btnPagar_Clicked"
                         IsEnabled="False" />
 
-                <!-- Espaciado adicional para evitar que el último elemento quede muy cerca de la barra -->
-                <BoxView HeightRequest="10" Color="Transparent"/>
+                <!-- Nota informativa -->
+                <Frame x:Name="frameNota"
+                       BackgroundColor="#E3F2FD"
+                       CornerRadius="10"
+                       Padding="15"
+                       HasShadow="False"
+                       BorderColor="#BBDEFB">
+                    <StackLayout Orientation="Horizontal" Spacing="10">
+                        <Label Text="ℹ️"
+                               FontSize="16"
+                               VerticalTextAlignment="Start" />
+                        <Label Text="Tu reserva será confirmada una vez que verifiquemos el pago. Recibirás una notificación cuando esto ocurra."
+                               FontSize="13"
+                               TextColor="#1565C0"
+                               VerticalOptions="Center"
+                               HorizontalOptions="FillAndExpand" />
+                    </StackLayout>
+                </Frame>
+
+                <!-- Espaciado adicional -->
+                <BoxView HeightRequest="20" Color="Transparent"/>
             </VerticalStackLayout>
         </ScrollView>
 

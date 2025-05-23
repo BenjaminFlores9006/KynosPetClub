@@ -3,124 +3,225 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:KynosPetClub.Controls"
              x:Class="KynosPetClub.Views.vReserva"
-             BackgroundColor="White"
-             Title="Reservas Activas">
+             BackgroundColor="#F5F5F5"
+             Title="Mis Reservas">
+
     <Grid RowDefinitions="*,Auto">
         <!-- Contenido principal -->
         <ScrollView Grid.Row="0">
-            <VerticalStackLayout Padding="20" Spacing="15">
-                <Label Text="Mis Reservas Activas"
-                       FontSize="20"
-                       FontAttributes="Bold"
-                       HorizontalTextAlignment="Center"/>
+            <VerticalStackLayout Padding="20" Spacing="20">
+
+                <!-- Header -->
+                <VerticalStackLayout Spacing="10">
+                    <StackLayout Orientation="Horizontal" 
+                                 HorizontalOptions="Center"
+                                 Spacing="10">
+                        <Label Text="📅"
+                               FontSize="28"
+                               VerticalTextAlignment="Center" />
+                        <Label Text="Mis Reservas Activas"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="#2E7D32"
+                               VerticalTextAlignment="Center" />
+                    </StackLayout>
+                    <Label Text="Aquí puedes ver y gestionar tus citas programadas"
+                           FontSize="14"
+                           TextColor="#666"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
                 <!-- Indicador de carga -->
-                <ActivityIndicator x:Name="loadingIndicator"
-                                 IsVisible="False"
-                                 IsRunning="False"
-                                 Color="#2E7D32"
-                                 HeightRequest="50"/>
+                <StackLayout x:Name="loadingSection" 
+                           IsVisible="False"
+                           Spacing="15"
+                           Padding="20">
+                    <ActivityIndicator x:Name="loadingIndicator"
+                                     IsVisible="False"
+                                     IsRunning="False"
+                                     Color="#4CAF50"
+                                     HeightRequest="40" />
+                    <Label Text="Cargando tus reservas..."
+                           FontSize="16"
+                           TextColor="#666"
+                           HorizontalTextAlignment="Center" />
+                </StackLayout>
 
                 <!-- Lista de reservas -->
                 <CollectionView x:Name="cvReservas"
                               ItemsSource="{Binding ReservasActivas}"
-                              EmptyView="No tienes reservas activas">
+                              BackgroundColor="Transparent"
+                              SelectionMode="None"
+                              VerticalScrollBarVisibility="Never">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame CornerRadius="10" 
+                            <Frame CornerRadius="15" 
                                    HasShadow="True" 
-                                   Padding="15"
-                                   Margin="0,5,0,5"
-                                   BackgroundColor="White">
-                                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" 
-                                      ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="15"
-                                      RowSpacing="8">
+                                   Padding="0"
+                                   Margin="0,8,0,8"
+                                   BackgroundColor="White"
+                                   BorderColor="#E0E0E0">
 
-                                    <!-- Imagen del servicio -->
-                                    <Image Grid.RowSpan="4"
-                                           Source="{Binding ImagenServicio}"
-                                           HeightRequest="80"
-                                           WidthRequest="80"
-                                           Aspect="AspectFill"
-                                           VerticalOptions="Center"/>
+                                <!-- Contenido de la tarjeta -->
+                                <StackLayout Padding="20" Spacing="12">
 
-                                    <!-- Estado de la reserva -->
-                                    <Frame Grid.Column="2"
-                                           BackgroundColor="{Binding ColorEstado}"
-                                           CornerRadius="15"
-                                           Padding="8,4,8,4"
-                                           HasShadow="False">
-                                        <Label Text="{Binding Estado}"
-                                               TextColor="White"
-                                               FontSize="12"
-                                               FontAttributes="Bold"
-                                               HorizontalTextAlignment="Center"/>
+                                    <!-- Header con icono, nombre y estado -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="70" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Icono del servicio -->
+                                        <Frame Grid.Column="0"
+                                               BackgroundColor="#F0F8FF"
+                                               CornerRadius="35"
+                                               HeightRequest="70"
+                                               WidthRequest="70"
+                                               HasShadow="False"
+                                               Padding="0"
+                                               VerticalOptions="Start"
+                                               HorizontalOptions="Center">
+                                            <Label Text="🏥"
+                                                   FontSize="28"
+                                                   HorizontalTextAlignment="Center"
+                                                   VerticalTextAlignment="Center"
+                                                   TextColor="#2196F3" />
+                                        </Frame>
+
+                                        <!-- Información principal -->
+                                        <StackLayout Grid.Column="1" Spacing="6" Margin="15,0,10,0">
+                                            <Label Text="{Binding Servicio.Nombre}"
+                                                   FontSize="20"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#2E7D32" />
+
+                                            <StackLayout Orientation="Horizontal" Spacing="8">
+                                                <Label Text="💰"
+                                                       FontSize="16"
+                                                       VerticalTextAlignment="Center" />
+                                                <Label Text="{Binding Servicio.Precio, StringFormat='{0:C}'}"
+                                                       FontSize="18"
+                                                       TextColor="#4CAF50"
+                                                       FontAttributes="Bold"
+                                                       VerticalTextAlignment="Center" />
+                                            </StackLayout>
+                                        </StackLayout>
+
+                                        <!-- Estado de la reserva -->
+                                        <Frame Grid.Column="2"
+                                               BackgroundColor="{Binding ColorEstado}"
+                                               CornerRadius="20"
+                                               Padding="12,6,12,6"
+                                               HasShadow="False"
+                                               VerticalOptions="Start">
+                                            <Label Text="{Binding Estado}"
+                                                   TextColor="White"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   HorizontalTextAlignment="Center" />
+                                        </Frame>
+                                    </Grid>
+
+                                    <!-- Información de mascota y fecha -->
+                                    <StackLayout Spacing="8" Margin="15,0,0,0">
+                                        <StackLayout Orientation="Horizontal" Spacing="10">
+                                            <Label Text="🐕"
+                                                   FontSize="16"
+                                                   VerticalTextAlignment="Center" />
+                                            <Label Text="{Binding MascotaInfo}"
+                                                   FontSize="16"
+                                                   TextColor="#666"
+                                                   VerticalTextAlignment="Center" />
+                                        </StackLayout>
+
+                                        <StackLayout Orientation="Horizontal" Spacing="10">
+                                            <Label Text="📅"
+                                                   FontSize="16"
+                                                   VerticalTextAlignment="Center" />
+                                            <Label Text="{Binding FechaServicioFormateada}"
+                                                   FontSize="16"
+                                                   TextColor="#1976D2"
+                                                   FontAttributes="Bold"
+                                                   VerticalTextAlignment="Center" />
+                                        </StackLayout>
+                                    </StackLayout>
+
+                                    <!-- AVISO DE PAGO PENDIENTE -->
+                                    <Frame BackgroundColor="#FFF3E0"
+                                           BorderColor="#FF9800"
+                                           CornerRadius="10"
+                                           Padding="15"
+                                           Margin="0,10,0,0"
+                                           HasShadow="False"
+                                           IsVisible="{Binding MostrarPendientePago}">
+                                        <StackLayout Orientation="Horizontal" Spacing="12">
+                                            <Label Text="⚠️"
+                                                   FontSize="16"
+                                                   VerticalTextAlignment="Center" />
+                                            <StackLayout HorizontalOptions="FillAndExpand">
+                                                <Label Text="Pendiente de pago"
+                                                       FontSize="14"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#E65100" />
+                                                <Label Text="Realiza el pago desde la sección 'Pagos'"
+                                                       FontSize="12"
+                                                       TextColor="#BF360C" />
+                                            </StackLayout>
+                                        </StackLayout>
                                     </Frame>
 
-                                    <!-- Información del servicio -->
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Servicio.Nombre}"
-                                           FontSize="18"
-                                           FontAttributes="Bold"
-                                           TextColor="#2E7D32"/>
+                                    <!-- Comentarios si existen -->
+                                    <Frame BackgroundColor="#F8F9FA"
+                                           CornerRadius="8"
+                                           Padding="15"
+                                           Margin="0,5,0,0"
+                                           HasShadow="False"
+                                           IsVisible="{Binding TieneComentarios}">
+                                        <StackLayout Orientation="Horizontal" Spacing="10">
+                                            <Label Text="📝"
+                                                   FontSize="14"
+                                                   VerticalTextAlignment="Start" />
+                                            <Label Text="{Binding Comentarios}"
+                                                   FontSize="14"
+                                                   TextColor="#666"
+                                                   VerticalOptions="Center"
+                                                   HorizontalOptions="FillAndExpand" />
+                                        </StackLayout>
+                                    </Frame>
 
-                                    <Label Grid.Column="1" Grid.Row="1"
-                                           Text="{Binding Servicio.Precio, StringFormat='{0:C}'}"
-                                           FontSize="16"
-                                           TextColor="#4CAF50"
-                                           FontAttributes="Bold"/>
-
-                                    <!-- Información de la mascota -->
-                                    <Label Grid.Column="1" Grid.Row="2"
-                                           Text="{Binding MascotaInfo}"
-                                           FontSize="14"
-                                           TextColor="#666"/>
-
-                                    <!-- Fecha del servicio -->
-                                    <Label Grid.Column="1" Grid.Row="3"
-                                           Text="{Binding FechaServicioFormateada}"
-                                           FontSize="14"
-                                           TextColor="#333"
-                                           FontAttributes="Bold"/>
+                                    <!-- Separador -->
+                                    <BoxView HeightRequest="1"
+                                             BackgroundColor="#E0E0E0"
+                                             Margin="0,15,0,10" />
 
                                     <!-- Botones de acción -->
-                                    <StackLayout Grid.ColumnSpan="3" Grid.Row="4"
-                                               Orientation="Horizontal"
-                                               HorizontalOptions="End"
-                                               Spacing="10"
-                                               Margin="0,10,0,0">
+                                    <StackLayout Orientation="Horizontal"
+                                                HorizontalOptions="End"
+                                                Spacing="12">
 
-                                        <Button x:Name="btnVerDetalles"
-                                                Text="Ver Detalles"
+                                        <Button Text="👁️ Ver Detalles"
                                                 BackgroundColor="#2196F3"
                                                 TextColor="White"
-                                                CornerRadius="5"
-                                                FontSize="12"
+                                                CornerRadius="8"
+                                                FontSize="13"
                                                 Padding="15,8,15,8"
                                                 CommandParameter="{Binding .}"
-                                                Clicked="OnVerDetallesClicked"/>
+                                                Clicked="OnVerDetallesClicked" />
 
-                                        <Button x:Name="btnCancelar"
-                                                Text="Cancelar"
+                                        <Button Text="❌ Cancelar"
                                                 BackgroundColor="#F44336"
                                                 TextColor="White"
-                                                CornerRadius="5"
-                                                FontSize="12"
+                                                CornerRadius="8"
+                                                FontSize="13"
                                                 Padding="15,8,15,8"
                                                 CommandParameter="{Binding .}"
                                                 Clicked="OnCancelarReservaClicked"
-                                                IsVisible="{Binding PuedeCancelarse}"/>
+                                                IsVisible="{Binding PuedeCancelarse}" />
                                     </StackLayout>
 
-                                    <!-- Comentarios si existen -->
-                                    <Label Grid.ColumnSpan="3" Grid.Row="5"
-                                           Text="{Binding Comentarios}"
-                                           FontSize="12"
-                                           TextColor="#888"
-                                           IsVisible="{Binding TieneComentarios}"
-                                           Margin="0,5,0,0"/>
-                                </Grid>
+                                </StackLayout>
                             </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -130,37 +231,49 @@
                 <StackLayout x:Name="emptyStateLayout"
                            IsVisible="False"
                            VerticalOptions="CenterAndExpand"
-                           Padding="20">
-                    <Label Text="📅"
-                           FontSize="60"
-                           HorizontalTextAlignment="Center"
-                           TextColor="#CCC"/>
-                    <Label Text="No tienes reservas activas"
-                           FontSize="18"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center"
-                           TextColor="#666"
-                           Margin="0,10,0,5"/>
-                    <Label Text="Cuando tengas servicios pendientes o en curso, aparecerán aquí"
-                           FontSize="14"
-                           HorizontalTextAlignment="Center"
-                           TextColor="#999"
-                           Margin="0,0,0,20"/>
-                    <Button Text="Ver Servicios Disponibles"
-                            BackgroundColor="#4CAF50"
-                            TextColor="White"
-                            CornerRadius="5"
-                            Clicked="OnVerServiciosClicked"/>
+                           Padding="40,60,40,40"
+                           Spacing="20">
+
+                    <Frame BackgroundColor="White"
+                           CornerRadius="20"
+                           Padding="30"
+                           HasShadow="True">
+                        <StackLayout Spacing="20">
+                            <Label Text="📅"
+                                   FontSize="70"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#E0E0E0" />
+                            <Label Text="No tienes reservas activas"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#666" />
+                            <Label Text="Cuando tengas servicios pendientes o en curso, aparecerán aquí para que puedas gestionarlos fácilmente"
+                                   FontSize="15"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#888"
+                                   LineBreakMode="WordWrap" />
+                            <Button Text="🏥 Ver Servicios Disponibles"
+                                    BackgroundColor="#4CAF50"
+                                    TextColor="White"
+                                    CornerRadius="12"
+                                    HeightRequest="50"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    Margin="0,10,0,0"
+                                    Clicked="OnVerServiciosClicked" />
+                        </StackLayout>
+                    </Frame>
                 </StackLayout>
 
                 <!-- Espaciado adicional -->
-                <BoxView HeightRequest="15" Color="Transparent"/>
+                <BoxView HeightRequest="20" Color="Transparent"/>
             </VerticalStackLayout>
         </ScrollView>
 
         <!-- Barra de navegación inferior -->
         <controls:BottomNavBar x:Name="bottomNavBar" 
                                Grid.Row="1" 
-                               Usuario="{Binding Usuario}"/>
+                               Usuario="{Binding Usuario}" />
     </Grid>
 </ContentPage>

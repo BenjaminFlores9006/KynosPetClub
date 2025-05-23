@@ -512,6 +512,34 @@ namespace KynosPetClub.Services
             }
         }
 
+
+        // Versión simplificada sin opciones JSON:
+
+        public async Task<List<Comprobante>> ObtenerComprobantesUsuarioAsync(int usuarioId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/comprobantes/usuario/{usuarioId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var comprobantes = JsonSerializer.Deserialize<List<Comprobante>>(json);
+                    return comprobantes ?? new List<Comprobante>();
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error al obtener comprobantes: {response.StatusCode}");
+                    return new List<Comprobante>();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Excepción al obtener comprobantes: {ex.Message}");
+                return new List<Comprobante>();
+            }
+        }
+
         public async Task<List<Plan>?> ObtenerPlanesAsync()
         {
             try
