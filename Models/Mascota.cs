@@ -17,6 +17,9 @@ public class Mascota
     [JsonPropertyName("fecha_nacimiento")]
     public DateTime FechaNacimiento { get; set; }
 
+    [JsonPropertyName("fecha_nacimiento")]
+    public string Foto { get; set; }
+
     [JsonPropertyName("usuario_id")]
     public int UsuarioId { get; set; }
 }

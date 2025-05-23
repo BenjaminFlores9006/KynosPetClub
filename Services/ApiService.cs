@@ -199,6 +199,7 @@ namespace KynosPetClub.Services
                     especie = mascota.Especie,
                     raza = mascota.Raza,
                     fecha_nacimiento = mascota.FechaNacimiento.ToString("yyyy-MM-dd"),
+                    foto = mascota.Foto,
                     usuario_id = mascota.UsuarioId
                 };
 
@@ -232,6 +233,7 @@ namespace KynosPetClub.Services
                     nombre = mascota.Nombre,
                     especie = mascota.Especie,
                     raza = mascota.Raza,
+                    foto = mascota.Foto,
                     fecha_nacimiento = mascota.FechaNacimiento.ToString("yyyy-MM-dd")
                 };
 
