@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:KynosPetClub.Controls"
              x:Class="KynosPetClub.Views.vHistorial"
-             Title="Historial">
+             Title="Historial"
+             BackgroundColor="#F5F5F5">
 
     <Grid RowDefinitions="*,Auto">
         <!-- Contenido principal -->
@@ -11,99 +12,220 @@
             <VerticalStackLayout Padding="20" Spacing="20">
 
                 <!-- Encabezado -->
-                <StackLayout Orientation="Horizontal"
-                             HorizontalOptions="Center"
-                             Spacing="10">
-                    <Label Text="📖"
-                           FontSize="28"
-                           VerticalTextAlignment="Center" />
-                    <Label Text="Historial de Reservas"
-                           FontSize="24"
-                           FontAttributes="Bold"
-                           TextColor="#4B8A8B"
-                           VerticalTextAlignment="Center" />
-                </StackLayout>
+                <VerticalStackLayout Spacing="10">
+                    <StackLayout Orientation="Horizontal"
+                                 HorizontalOptions="Center"
+                                 Spacing="10">
+                        <Label Text="📖"
+                               FontSize="28"
+                               VerticalTextAlignment="Center" />
+                        <Label Text="Historial de Reservas"
+                               FontSize="24"
+                               FontAttributes="Bold"
+                               TextColor="#4B8A8B"
+                               VerticalTextAlignment="Center" />
+                    </StackLayout>
+                    <Label Text="Revisa tus servicios completados y cancelados"
+                           FontSize="14"
+                           TextColor="#666"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
                 <!-- Filtros -->
                 <Frame BackgroundColor="White"
-                       Padding="10"
+                       Padding="15"
                        CornerRadius="15"
                        HasShadow="True"
                        BorderColor="#E0E0E0">
-                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="20">
-                        <Button Text="✅ Completados"
-                                BackgroundColor="#E8F5E9"
-                                TextColor="#2E7D32"
-                                CornerRadius="20"
-                                FontSize="14"
-                                Clicked="btnFiltroSeleccionado_Clicked"/>
-                        <Button Text="❌ Cancelados"
-                                BackgroundColor="#FFEBEE"
-                                TextColor="#C62828"
-                                CornerRadius="20"
-                                FontSize="14"
-                                Clicked="btnFiltroSeleccionado_Clicked"/>
-                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="15">
+                        <Label Text="🔍 Filtrar por estado"
+                               FontSize="16"
+                               FontAttributes="Bold"
+                               TextColor="#4B8A8B"
+                               HorizontalTextAlignment="Center" />
+
+                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="15">
+                            <Button x:Name="btnTodos"
+                                    Text="📋 Todos"
+                                    BackgroundColor="#4B8A8B"
+                                    TextColor="White"
+                                    CornerRadius="20"
+                                    FontSize="14"
+                                    Padding="20,8"
+                                    Clicked="btnFiltroSeleccionado_Clicked"/>
+
+                            <Button x:Name="btnCompletados"
+                                    Text="✅ Completados"
+                                    BackgroundColor="#E8F5E9"
+                                    TextColor="#2E7D32"
+                                    CornerRadius="20"
+                                    FontSize="14"
+                                    Padding="20,8"
+                                    Clicked="btnFiltroSeleccionado_Clicked"/>
+
+                            <Button x:Name="btnCancelados"
+                                    Text="❌ Cancelados"
+                                    BackgroundColor="#FFEBEE"
+                                    TextColor="#C62828"
+                                    CornerRadius="20"
+                                    FontSize="14"
+                                    Padding="20,8"
+                                    Clicked="btnFiltroSeleccionado_Clicked"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
                 </Frame>
 
+                <!-- Indicador de carga -->
+                <StackLayout x:Name="loadingSection" 
+                           IsVisible="False"
+                           Spacing="15"
+                           Padding="20">
+                    <ActivityIndicator x:Name="loadingIndicator"
+                                     IsVisible="False"
+                                     IsRunning="False"
+                                     Color="#4CAF50"
+                                     HeightRequest="40" />
+                    <Label Text="Cargando historial..."
+                           FontSize="16"
+                           TextColor="#666"
+                           HorizontalTextAlignment="Center" />
+                </StackLayout>
+
                 <!-- Lista de historial -->
-                <CollectionView ItemsSource="{Binding Reservas}">
+                <CollectionView x:Name="cvHistorial"
+                              ItemsSource="{Binding ReservasHistorial}"
+                              BackgroundColor="Transparent"
+                              SelectionMode="None">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Frame Padding="15"
+                            <Frame Padding="20"
                                    CornerRadius="15"
                                    BackgroundColor="White"
                                    HasShadow="True"
-                                   BorderColor="#A5C9CA"
-                                   Margin="0,5">
-                                <VerticalStackLayout Spacing="8">
-                                    <!-- Encabezado -->
-                                    <Grid ColumnDefinitions="Auto,*,Auto">
-                                        <Label Grid.Column="0"
-                                               Text="📌"
-                                               FontSize="16"
-                                               VerticalTextAlignment="Center"/>
+                                   BorderColor="#E0E0E0"
+                                   Margin="0,8">
+                                <VerticalStackLayout Spacing="12">
 
-                                        <Label Grid.Column="1"
-                                               Text="{Binding Servicio.Nombre}"
-                                               FontSize="16"
-                                               FontAttributes="Bold"
-                                               TextColor="#4B8A8B"
-                                               VerticalTextAlignment="Center"/>
+                                    <!-- Header con servicio y estado -->
+                                    <Grid ColumnDefinitions="60,*,Auto">
+                                        <!-- Icono -->
+                                        <Frame Grid.Column="0"
+                                               BackgroundColor="#F0F8FF"
+                                               CornerRadius="30" 
+                                               HeightRequest="60"
+                                               WidthRequest="60"
+                                               HasShadow="False"
+                                               Padding="0"
+                                               VerticalOptions="Center">
+                                            <Label Text="🏥"
+                                                   FontSize="24"
+                                                   HorizontalTextAlignment="Center"
+                                                   VerticalTextAlignment="Center"
+                                                   TextColor="#2196F3" />
+                                        </Frame>
 
-                                        <Label Grid.Column="2"
-                                               Text="{Binding Estado}"
-                                               FontAttributes="Bold"
-                                               TextColor="Orange"
-                                               VerticalTextAlignment="Center"
-                                               HorizontalTextAlignment="End"/>
+                                        <!-- Info del servicio -->
+                                        <StackLayout Grid.Column="1" 
+                                                   Spacing="4"
+                                                   Margin="15,0,10,0"
+                                                   VerticalOptions="Center">
+                                            <Label Text="{Binding ServicioNombre}"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#4B8A8B"/>
+                                            <Label Text="{Binding MascotaInfo}"
+                                                   FontSize="14"
+                                                   TextColor="#666"/>
+                                        </StackLayout>
+
+                                        <!-- Estado -->
+                                        <Frame Grid.Column="2"
+                                               BackgroundColor="{Binding ColorEstado}"
+                                               CornerRadius="15"
+                                               Padding="12,6"
+                                               HasShadow="False"
+                                               VerticalOptions="Start">
+                                            <Label Text="{Binding Estado}"
+                                                   TextColor="White"
+                                                   FontSize="12"
+                                                   FontAttributes="Bold"
+                                                   HorizontalTextAlignment="Center" />
+                                        </Frame>
                                     </Grid>
 
+                                    <!-- Detalles -->
+                                    <StackLayout Spacing="6" Margin="15,0,0,0">
+                                        <!-- Fecha del servicio -->
+                                        <StackLayout Orientation="Horizontal" Spacing="8">
+                                            <Label Text="📅" FontSize="16" />
+                                            <Label Text="{Binding FechaServicioFormateada}"
+                                                   TextColor="#1976D2"
+                                                   FontSize="15"
+                                                   FontAttributes="Bold"/>
+                                        </StackLayout>
 
-                                    <!-- Fecha -->
-                                    <StackLayout Orientation="Horizontal" Spacing="6">
-                                        <Label Text="📅" FontSize="14" />
-                                        <Label Text="{Binding FechaServicio, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
-                                               TextColor="#666"
-                                               FontSize="14"/>
+                                        <!-- Precio -->
+                                        <StackLayout Orientation="Horizontal" Spacing="8">
+                                            <Label Text="💰" FontSize="16" />
+                                            <Label Text="{Binding PrecioFormateado}"
+                                                   TextColor="#4CAF50"
+                                                   FontSize="15"
+                                                   FontAttributes="Bold"/>
+                                        </StackLayout>
+
+                                        <!-- Comentarios si existen -->
+                                        <StackLayout Orientation="Horizontal" 
+                                                   Spacing="8"
+                                                   IsVisible="{Binding TieneComentarios}">
+                                            <Label Text="💬" FontSize="16" />
+                                            <Label Text="{Binding Comentarios}"
+                                                   FontSize="14"
+                                                   TextColor="#666"
+                                                   FontAttributes="Italic"
+                                                   HorizontalOptions="FillAndExpand"/>
+                                        </StackLayout>
                                     </StackLayout>
 
-                                    <!-- Comentarios -->
-                                    <StackLayout Orientation="Horizontal" Spacing="6" IsVisible="{Binding Comentarios}">
-                                        <Label Text="💬" FontSize="14"/>
-                                        <Label Text="{Binding Comentarios}"
-                                               FontSize="14"
-                                               TextColor="#666"
-                                               FontAttributes="Italic"/>
-                                    </StackLayout>
                                 </VerticalStackLayout>
                             </Frame>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+
+                <!-- Mensaje cuando no hay historial -->
+                <StackLayout x:Name="emptyStateLayout"
+                           IsVisible="False"
+                           VerticalOptions="CenterAndExpand"
+                           Padding="40,60,40,40"
+                           Spacing="20">
+
+                    <Frame BackgroundColor="White"
+                           CornerRadius="20"
+                           Padding="30"
+                           HasShadow="True">
+                        <StackLayout Spacing="20">
+                            <Label Text="📖"
+                                   FontSize="70"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#E0E0E0" />
+                            <Label Text="No hay historial disponible"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#666" />
+                            <Label Text="Cuando completes o canceles servicios, aparecerán aquí para que puedas revisarlos"
+                                   FontSize="15"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#888"
+                                   LineBreakMode="WordWrap" />
+                        </StackLayout>
+                    </Frame>
+                </StackLayout>
+
+                <!-- Espaciado adicional -->
+                <BoxView HeightRequest="20" Color="Transparent"/>
             </VerticalStackLayout>
         </ScrollView>
-
 
         <!-- Barra de navegación inferior -->
         <controls:BottomNavBar x:Name="bottomNavBar" 
