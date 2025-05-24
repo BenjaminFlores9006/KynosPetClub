@@ -171,13 +171,16 @@ namespace KynosPetClub.Services
             {
                 string url = $"{_supabaseUrl}/usuario?id=eq.{usuario.Id}";
 
-                // Crear objeto con todos los campos que se pueden actualizar
+                // Para administradores, permitir actualización completa incluyendo rol y plan
                 var usuarioData = new
                 {
                     nombre = usuario.nombre,
                     apellido = usuario.apellido,
                     fechanac = usuario.fechanac.ToString("yyyy-MM-dd"),
+                    correo = usuario.correo,
                     foto = usuario.foto,
+                    rol_id = usuario.RolId,
+                    plan_id = usuario.PlanId,
                     contraseña = usuario.contraseña
                 };
 
@@ -567,22 +570,28 @@ namespace KynosPetClub.Services
             }
         }
 
-        public async Task<List<Plan>?> ObtenerPlanesAsync()
+        public async Task<List<Plan>> ObtenerPlanesAsync()
         {
             try
             {
                 var url = $"{_supabaseUrl}/plan";
                 var response = await _httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
-                    return null;
+                {
+                    Console.WriteLine($"Error al obtener planes: {response.StatusCode}");
+                    return new List<Plan>();
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Respuesta planes JSON: {json}");
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                return JsonSerializer.Deserialize<List<Plan>>(json, options);
+                var planes = JsonSerializer.Deserialize<List<Plan>>(json, options);
+                return planes ?? new List<Plan>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return null;
+                Console.WriteLine($"Error al obtener planes: {ex.Message}");
+                return new List<Plan>();
             }
         }
 
@@ -650,14 +659,21 @@ namespace KynosPetClub.Services
             {
                 var url = $"{_supabaseUrl}/rol";
                 var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return new List<Rol>();
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Error al obtener roles: {response.StatusCode}");
+                    return new List<Rol>();
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Respuesta roles JSON: {json}");
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                return JsonSerializer.Deserialize<List<Rol>>(json, options) ?? new List<Rol>();
+                var roles = JsonSerializer.Deserialize<List<Rol>>(json, options);
+                return roles ?? new List<Rol>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error al obtener roles: {ex.Message}");
                 return new List<Rol>();
             }
         }
