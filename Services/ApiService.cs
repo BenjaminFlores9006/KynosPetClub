@@ -981,20 +981,26 @@ namespace KynosPetClub.Services
             }
         }
 
+        // Método mejorado para obtener reservas pendientes de asignación
         public async Task<List<Reserva>> ObtenerReservasPendientesAsignacionAsync()
         {
             try
             {
+                // Obtener solo reservas "Pendiente" que necesitan asignación
                 var url = $"{_supabaseUrl}/reserva?estado=eq.Pendiente&select=*,servicio:servicio_id(*),mascota:mascota_id(*)";
                 var response = await _httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode) return new List<Reserva>();
 
                 var json = await response.Content.ReadAsStringAsync();
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                return JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+                var reservas = JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+
+                // Ordenar por fecha de servicio
+                return reservas.OrderBy(r => r.FechaServicio).ToList();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error al obtener reservas pendientes: {ex.Message}");
                 return new List<Reserva>();
             }
         }
