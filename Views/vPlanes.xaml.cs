@@ -1,5 +1,6 @@
 using KynosPetClub.Models;
 using KynosPetClub.Services;
+using System.Collections.ObjectModel;
 
 namespace KynosPetClub.Views;
 
@@ -7,10 +8,8 @@ public partial class vPlanes : ContentPage
 {
     private readonly Usuario _usuario;
     private readonly ApiService _apiService;
+    public ObservableCollection<Plan> PlanesDisponibles { get; set; } = new();
 
-    public List<Plan> PlanesDisponibles { get; set; }
-
-    // Propiedad para binding del Usuario al BottomNavBar
     public Usuario Usuario => _usuario;
 
     public vPlanes(Usuario usuario)
@@ -27,11 +26,19 @@ public partial class vPlanes : ContentPage
         try
         {
             var planes = await _apiService.ObtenerPlanesAsync();
-            if (planes != null && planes.Any())
+
+            PlanesDisponibles.Clear();
+            foreach (var plan in planes)
             {
-                PlanesDisponibles = planes;
-                // Actualizar UI con los planes si es necesario
-                ActualizarPreciosEnUI();
+                PlanesDisponibles.Add(new PlanViewModel
+                {
+                    Id = plan.Id,
+                    Nombre = plan.Nombre,
+                    Descripcion = plan.Descripcion,
+                    Precio = plan.Precio,
+                    DuracionDias = plan.DuracionDias,
+                    ColorPlan = ObtenerColorPlan(plan.Id)
+                });
             }
         }
         catch (Exception ex)
@@ -40,66 +47,74 @@ public partial class vPlanes : ContentPage
         }
     }
 
+    private Color ObtenerColorPlan(int planId)
+    {
+        return planId switch
+        {
+            1 => Color.FromArgb("#4CAF50"), // Verde para plan básico
+            2 => Color.FromArgb("#2196F3"), // Azul para plan premium
+            3 => Color.FromArgb("#FFC107"), // Amarillo para plan gold
+            _ => Color.FromArgb("#9E9E9E")  // Gris por defecto
+        };
+    }
+
     private void ActualizarPreciosEnUI()
     {
         // Si tienes precios dinámicos desde la API, puedes actualizar los Labels aquí
         // Por ejemplo, encontrar los Labels de precio y actualizarlos
         // Esto es opcional dependiendo de si quieres precios dinámicos o estáticos
     }
-
-    private async void btnPlan1_Clicked(object sender, EventArgs e)
+    private async void btnSeleccionarPlan_Clicked(object sender, EventArgs e)
     {
-        try
+        if (sender is Button button && button.CommandParameter is PlanViewModel plan)
         {
-            decimal precio = 100; // Precio por defecto
+            bool confirmar = await DisplayAlert("Confirmar",
+                $"¿Deseas adquirir el plan {plan.Nombre} por {plan.Precio:C}?\n\n{plan.Descripcion}",
+                "Sí", "No");
 
-            // Si tienes planes cargados desde la API, usar ese precio
-            if (PlanesDisponibles != null && PlanesDisponibles.Count > 0)
+            if (confirmar)
             {
-                precio = PlanesDisponibles[0].Precio;
-            }
-
-            await Navigation.PushAsync(new vPagos(_usuario,
-                new Servicio
+                // Crear un servicio ficticio para representar el plan
+                var servicioPlan = new Servicio
                 {
-                    Nombre = "Plan Básico",
-                    Precio = precio,
-                    Descripcion = "Plan básico mensual con servicios esenciales"
-                },
-                new Mascota { Nombre = "Plan de membresía" },
-                DateTime.Now));
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", $"Error al procesar el plan: {ex.Message}", "OK");
+                    Id = 0, // ID especial para planes
+                    Nombre = $"Plan {plan.Nombre}",
+                    Descripcion = plan.Descripcion,
+                    Precio = plan.Precio
+                };
+
+                // Obtener la primera mascota del usuario o crear una ficticia
+                var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(_usuario.Id.Value);
+                var mascota = mascotas?.FirstOrDefault() ?? new Mascota
+                {
+                    Id = 0,
+                    Nombre = "Mascota General"
+                };
+
+                // Convertir el PlanViewModel a Plan para pasarlo como parámetro
+                var planSeleccionado = new Plan
+                {
+                    Id = plan.Id,
+                    Nombre = plan.Nombre,
+                    Descripcion = plan.Descripcion,
+                    Precio = plan.Precio,
+                    DuracionDias = plan.DuracionDias
+                };
+
+                // Navegar a vPagos con todos los parámetros necesarios
+                await Navigation.PushAsync(new vPagos(
+                    usuario: _usuario,
+                    servicio: servicioPlan,
+                    mascota: mascota,
+                    fechaServicio: DateTime.Now,
+                    reservaId: 0,
+                    planSeleccionado: planSeleccionado));
+            }
         }
     }
 
-    private async void btnPlan2_Clicked(object sender, EventArgs e)
+    public class PlanViewModel : Plan
     {
-        try
-        {
-            decimal precio = 200; // Precio por defecto
-
-            // Si tienes planes cargados desde la API, usar ese precio
-            if (PlanesDisponibles != null && PlanesDisponibles.Count > 1)
-            {
-                precio = PlanesDisponibles[1].Precio;
-            }
-
-            await Navigation.PushAsync(new vPagos(_usuario,
-                new Servicio
-                {
-                    Nombre = "Plan Completo",
-                    Precio = precio,
-                    Descripcion = "Plan completo mensual con servicios premium"
-                },
-                new Mascota { Nombre = "Plan de membresía" },
-                DateTime.Now));
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Error", $"Error al procesar el plan: {ex.Message}", "OK");
-        }
+        public Color ColorPlan { get; set; }
     }
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vAdministrarUsuarios"
+             Title="Administrar Usuarios">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <Label Text="Lista de Usuarios"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"/>
+
+                <SearchBar x:Name="searchBar"
+                           Placeholder="Buscar usuarios..."
+                           TextChanged="searchBar_TextChanged"/>
+
+                <CollectionView x:Name="cvUsuarios">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="15" CornerRadius="10" HasShadow="True">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <Label Text="{Binding nombre}"
+                                           Grid.Column="0"
+                                           Grid.Row="0"
+                                           FontSize="16"
+                                           FontAttributes="Bold"/>
+                                    <Label Text="{Binding correo}"
+                                           Grid.Column="0"
+                                           Grid.Row="1"
+                                           FontSize="14"
+                                           TextColor="Gray"/>
+                                    <Label Text="{Binding RolNombre}"
+                                           Grid.Column="1"
+                                           Grid.Row="0"
+                                           FontSize="14"/>
+                                    <Button x:Name="btnEditarUsuario" Text="Editar"
+                                            Grid.Column="1"
+                                            Grid.Row="1"
+                                            BackgroundColor="#2196F3"
+                                            TextColor="White"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="btnEditarUsuario_Clicked"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+        <Button x:Name="btnVolver" Text="Volver"
+                Grid.Row="1"
+                Clicked="btnVolver_Clicked"/>
+    </Grid>
+</ContentPage>

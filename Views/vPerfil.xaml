@@ -234,6 +234,27 @@
                         FontAttributes="Bold"
                         FontSize="16"
                         Clicked="btnCerrarSesion_Clicked"/>
+                <Button x:Name="btnAdminOpciones"
+                        Text="⚙️ Opciones de Administrador"
+                        BackgroundColor="#6A1B9A"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        IsVisible="False"
+                        Clicked="btnAdminOpciones_Clicked"/>
+
+                <Button x:Name="btnVerCitas"
+                        Text="📅 Ver Citas Asignadas"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        FontSize="16"
+                        IsVisible="False"
+                        Clicked="btnVerCitas_Clicked"/>
 
                 <!-- Espaciado adicional para evitar que el último elemento quede muy cerca de la barra -->
                 <BoxView HeightRequest="15" Color="Transparent"/>

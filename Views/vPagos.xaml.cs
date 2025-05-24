@@ -14,6 +14,7 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
     private byte[] _comprobanteData;
     private string _comprobanteFileName;
     private int _reservaId;
+    private readonly Plan _planSeleccionado;
 
     public List<string> MetodosPago { get; } = new List<string>
     {
@@ -25,7 +26,7 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
     // Propiedad para binding del Usuario al BottomNavBar
     public Usuario Usuario => _usuario;
 
-    public vPagos(Usuario usuario, Servicio servicio, Mascota mascota, DateTime fechaServicio, int reservaId = 0)
+    public vPagos(Usuario usuario, Servicio servicio, Mascota mascota, DateTime fechaServicio, int reservaId = 0, Plan planSeleccionado = null)
     {
         InitializeComponent();
         _usuario = usuario;
@@ -33,6 +34,7 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
         _mascota = mascota;
         _fechaServicio = fechaServicio;
         _reservaId = reservaId;
+        _planSeleccionado = planSeleccionado;
         _apiService = new ApiService();
 
         BindingContext = this;
@@ -187,7 +189,27 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
             btnPagar.IsEnabled = false;
             btnPagar.Text = "⏳ Procesando pago...";
 
-            // LÓGICA NUEVA: Si _reservaId es 0, significa "Pagar Ahora" - crear reserva primero
+            // Lógica especial para planes
+            if (_servicio.Id == 0 && _planSeleccionado != null) // ID especial para planes
+            {
+                // Actualizar el plan del usuario
+                _usuario.PlanId = _planSeleccionado.Id;
+                var actualizacionExitosa = await _apiService.ActualizarUsuarioAsync(_usuario);
+
+                if (actualizacionExitosa)
+                {
+                    await DisplayAlert("✅ Éxito", "Plan adquirido correctamente", "OK");
+                    await Navigation.PopToRootAsync();
+                    return;
+                }
+                else
+                {
+                    await DisplayAlert("❌ Error", "No se pudo adquirir el plan", "OK");
+                    return;
+                }
+            }
+
+            // LÓGICA para reservas normales
             int reservaIdFinal = _reservaId;
 
             if (_reservaId == 0)
@@ -204,22 +226,20 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
                     ServicioId = _servicio.Id
                 };
 
-                var resultadoReserva = await _apiService.CrearReservaAsync(nuevaReserva);
+                var resultadoCreacion = await _apiService.CrearReservaAsync(nuevaReserva);
 
-                if (int.TryParse(resultadoReserva, out int nuevaReservaId))
+                if (int.TryParse(resultadoCreacion, out int nuevaReservaId))
                 {
                     reservaIdFinal = nuevaReservaId;
                 }
-                else if (resultadoReserva == "OK")
+                else if (resultadoCreacion == "OK")
                 {
-                    // Si la API devuelve "OK" pero no un ID, intentar obtener la última reserva
-                    // (esto es un fallback, idealmente la API debería devolver el ID)
-                    reservaIdFinal = 0; // Dejaremos que el comprobante se cree sin ReservaId específico
+                    reservaIdFinal = 0;
                 }
                 else
                 {
                     await DisplayAlert("❌ Error",
-                        $"No se pudo crear la reserva: {resultadoReserva}\n\nPor favor, inténtalo nuevamente.",
+                        $"No se pudo crear la reserva: {resultadoCreacion}\n\nPor favor, inténtalo nuevamente.",
                         "OK");
                     return;
                 }
@@ -231,14 +251,14 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
                 Descripcion = $"Pago por {_servicio.Nombre} - {_mascota.Nombre} - {_fechaServicio:dd/MM/yyyy HH:mm}",
                 UsuarioId = _usuario.Id.Value,
                 ReservaId = reservaIdFinal,
-                Estado = "Pendiente", // El admin debe verificar
+                Estado = "Pendiente",
                 FechaSubida = DateTime.Now
             };
 
             using var stream = new MemoryStream(_comprobanteData);
-            var resultado = await _apiService.SubirComprobanteAsync(comprobante, stream, _comprobanteFileName);
+            var resultadoSubida = await _apiService.SubirComprobanteAsync(comprobante, stream, _comprobanteFileName);
 
-            if (resultado == "OK" || int.TryParse(resultado, out _))
+            if (resultadoSubida == "OK" || int.TryParse(resultadoSubida, out _))
             {
                 await DisplayAlert("🎉 ¡Pago Enviado!",
                     $"Tu comprobante de pago ha sido enviado correctamente.\n\n" +
@@ -251,13 +271,12 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
                     $"⏳ Nuestro equipo verificará el pago y te notificaremos cuando esté confirmado.",
                     "Perfecto");
 
-                // Regresar a la página principal
                 await Navigation.PopToRootAsync();
             }
             else
             {
                 await DisplayAlert("❌ Error",
-                    $"No se pudo procesar el pago:\n{resultado}\n\nPor favor, inténtalo nuevamente.",
+                    $"No se pudo procesar el pago:\n{resultadoSubida}\n\nPor favor, inténtalo nuevamente.",
                     "OK");
             }
         }

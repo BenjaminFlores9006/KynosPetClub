@@ -209,6 +209,33 @@ namespace KynosPetClub.Services
             }
         }
 
+        public async Task<bool> ActualizarUsuarioAdminAsync(Usuario usuario)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/usuario?id=eq.{usuario.Id}";
+                var usuarioData = new
+                {
+                    nombre = usuario.nombre,
+                    apellido = usuario.apellido,
+                    correo = usuario.correo,
+                    fechanac = usuario.fechanac.ToString("yyyy-MM-dd"),
+                    rol_id = usuario.RolId,
+                    plan_id = usuario.PlanId
+                };
+
+                var json = JsonSerializer.Serialize(usuarioData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PatchAsync(url, content);
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         public async Task<string> AgregarMascotaAsync(Mascota mascota)
         {
             try
@@ -428,30 +455,31 @@ namespace KynosPetClub.Services
         {
             try
             {
-                // Subir el archivo a Supabase Storage
-                var storageUrl = _supabaseUrl.Replace("/rest/v1",
-                    $"/storage/v1/object/comprobantes/{comprobante.UsuarioId}/{fileName}");
+                // 1. Configurar headers con token JWT válido
+                var jwtToken = await SecureStorage.GetAsync("supabase_jwt");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+
+                // 2. Subir a Supabase Storage
+                var storageUrl = $"https://{_supabaseUrl.Replace("https://", "")}/storage/v1/object/comprobantes/{comprobante.UsuarioId}/{fileName}";
 
                 using var content = new StreamContent(fileStream);
                 content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-
-                _httpClient.DefaultRequestHeaders.Remove("Authorization");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _supabaseApiKey);
 
                 var storageResponse = await _httpClient.PostAsync(storageUrl, content);
 
                 if (!storageResponse.IsSuccessStatusCode)
                 {
-                    return $"Error al subir archivo: {await storageResponse.Content.ReadAsStringAsync()}";
+                    var error = await storageResponse.Content.ReadAsStringAsync();
+                    return $"Error al subir archivo: {error}";
                 }
 
-                // Crear el registro en la tabla comprobante
+                // 3. Crear registro en tabla comprobante
                 var comprobanteUrl = $"{_supabaseUrl}/comprobante";
                 var comprobanteData = new
                 {
-                    descripcion = comprobante.Descripcion,
+                    description = comprobante.Descripcion,
                     fecha_subida = DateTime.UtcNow,
-                    url_archivo = $"{_supabaseUrl.Replace("/rest/v1", "")}/storage/v1/object/public/comprobantes/{comprobante.UsuarioId}/{fileName}",
+                    url_archive = $"{_supabaseUrl.Replace("/rest/v1", "")}/storage/v1/object/public/comprobantes/{comprobante.UsuarioId}/{fileName}",
                     estado = "Pendiente",
                     usuario_id = comprobante.UsuarioId,
                     reserva_id = comprobante.ReservaId
@@ -460,10 +488,9 @@ namespace KynosPetClub.Services
                 var json = JsonSerializer.Serialize(comprobanteData);
                 var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                _httpClient.DefaultRequestHeaders.Remove("Prefer");
                 _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
-
                 var response = await _httpClient.PostAsync(comprobanteUrl, stringContent);
+
                 return response.IsSuccessStatusCode ? "OK" : $"Error: {await response.Content.ReadAsStringAsync()}";
             }
             catch (Exception ex)
@@ -556,6 +583,160 @@ namespace KynosPetClub.Services
             catch (Exception)
             {
                 return null;
+            }
+        }
+
+        public async Task<List<Comprobante>> ObtenerComprobantesPendientesAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/comprobante?estado=eq.Pendiente";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return new List<Comprobante>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Comprobante>>(json, options) ?? new List<Comprobante>();
+            }
+            catch (Exception)
+            {
+                return new List<Comprobante>();
+            }
+        }
+
+        public async Task<bool> ActualizarComprobanteAsync(Comprobante comprobante)
+        {
+            try
+            {
+                string url = $"{_supabaseUrl}/comprobante?id=eq.{comprobante.Id}";
+                var comprobanteData = new
+                {
+                    estado = comprobante.Estado,
+                    comentario_admin = comprobante.ComentarioAdmin
+                };
+
+                var json = JsonSerializer.Serialize(comprobanteData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PatchAsync(url, content);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<List<Usuario>> ObtenerTodosUsuariosAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/usuario";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return new List<Usuario>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Usuario>>(json, options) ?? new List<Usuario>();
+            }
+            catch (Exception)
+            {
+                return new List<Usuario>();
+            }
+        }
+
+        public async Task<List<Rol>> ObtenerRolesAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/rol";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return new List<Rol>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Rol>>(json, options) ?? new List<Rol>();
+            }
+            catch (Exception)
+            {
+                return new List<Rol>();
+            }
+        }
+
+        public async Task<List<Reserva>> ObtenerReservasPendientesAsignacionAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/reserva?estado=eq.Pendiente&select=*,servicio:servicio_id(*),mascota:mascota_id(*)";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return new List<Reserva>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+            }
+            catch (Exception)
+            {
+                return new List<Reserva>();
+            }
+        }
+
+        public async Task<List<Reserva>> ObtenerCitasAsignadasAsync(int funcionarioId)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/reserva?funcionario_id=eq.{funcionarioId}&select=*,servicio:servicio_id(*),mascota:mascota_id(*)";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode) return new List<Reserva>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                return JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+            }
+            catch (Exception)
+            {
+                return new List<Reserva>();
+            }
+        }
+
+        public async Task<bool> AsignarFuncionarioAReservaAsync(int reservaId, int funcionarioId)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/reserva?id=eq.{reservaId}";
+                var data = new
+                {
+                    funcionario_id = funcionarioId,
+                    estado = "En curso",
+                    fecha_asignacion = DateTime.UtcNow
+                };
+
+                var json = JsonSerializer.Serialize(data);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PatchAsync(url, content);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<List<Usuario>> ObtenerFuncionariosAsync()
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/usuario?rol_id=eq.3"; // Rol 3 = Funcionario
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode) return new List<Usuario>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<Usuario>>(json) ?? new List<Usuario>();
+            }
+            catch
+            {
+                return new List<Usuario>();
             }
         }
     }

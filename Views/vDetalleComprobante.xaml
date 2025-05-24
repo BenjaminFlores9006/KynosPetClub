@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vDetalleComprobante"
+             Title="Detalle Comprobante">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Detalle del Comprobante"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+
+            <Label Text="{Binding Comprobante.Description}"
+                   FontSize="16"/>
+
+            <Label Text="{Binding Comprobante.FechaSubida, StringFormat='Subido el: {0:dd/MM/yyyy HH:mm}'}"
+                   FontSize="14"
+                   TextColor="Gray"/>
+
+            <!-- Imagen del comprobante -->
+            <Frame HeightRequest="300"
+                   CornerRadius="10"
+                   HasShadow="True">
+                <Image Source="{Binding Comprobante.UrlArchivo}"
+                       Aspect="AspectFit"/>
+            </Frame>
+
+            <!-- Estado actual -->
+            <Label Text="Estado actual:"
+                   FontAttributes="Bold"/>
+            <Label Text="{Binding Comprobante.Estado}"
+                   TextColor="{Binding EstadoColor}"/>
+
+            <!-- Cambiar estado -->
+            <Label Text="Cambiar estado a:"
+                   FontAttributes="Bold"/>
+            <Picker x:Name="pickerEstado"
+                    SelectedIndexChanged="pickerEstado_SelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>Aprobado</x:String>
+                    <x:String>Rechazado</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- Comentario del admin -->
+            <Label Text="Comentario:"
+                   FontAttributes="Bold"/>
+            <Editor x:Name="editorComentario"
+                    HeightRequest="100"
+                    Text="{Binding Comprobante.ComentarioAdmin}"/>
+
+            <!-- Botones -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button x:Name="btnGuardar" Text="Guardar Cambios"
+                        Grid.Column="0"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        Clicked="btnGuardar_Clicked"/>
+
+                <Button x:Name="btnCancelar" Text="Cancelar"
+                        Grid.Column="1"
+                        BackgroundColor="#F44336"
+                        TextColor="White"
+                        Clicked="btnCancelar_Clicked"/>
+            </Grid>
+
+            <Label Text="{Binding MensajeError}"
+                   TextColor="Red"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

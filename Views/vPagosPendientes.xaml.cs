@@ -9,16 +9,18 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
 {
     private readonly Usuario _usuario;
     private readonly ApiService _apiService;
+    private readonly Plan _planSeleccionado;
 
     public ObservableCollection<ReservaPendientePago> ReservasPendientesPago { get; set; }
 
     // Propiedad para binding del Usuario al BottomNavBar
     public Usuario Usuario => _usuario;
 
-    public vPagosPendientes(Usuario usuario)
+    public vPagosPendientes(Usuario usuario, Plan plan = null)
     {
         InitializeComponent();
         _usuario = usuario;
+        _planSeleccionado = plan;
         _apiService = new ApiService();
         ReservasPendientesPago = new ObservableCollection<ReservaPendientePago>();
 
@@ -29,6 +31,43 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
     {
         base.OnAppearing();
         await CargarReservasPendientes();
+
+        // Si hay un plan seleccionado, mostrar opción para pagarlo
+        if (_planSeleccionado != null)
+        {
+            await MostrarOpcionPagoPlan();
+        }
+    }
+
+    private async Task MostrarOpcionPagoPlan()
+    {
+        bool confirmar = await DisplayAlert("Adquirir Plan",
+            $"¿Deseas proceder con el pago del plan {_planSeleccionado.Nombre} por {_planSeleccionado.Precio:C}?",
+            "Sí, Pagar Ahora", "Más Tarde");
+
+        if (confirmar)
+        {
+            // Crear un servicio ficticio para el plan
+            var servicioPlan = new Servicio
+            {
+                Id = 0, // ID especial para planes
+                Nombre = $"Plan {_planSeleccionado.Nombre}",
+                Descripcion = _planSeleccionado.Descripcion,
+                Precio = _planSeleccionado.Precio
+            };
+
+            // Usar la primera mascota del usuario o crear una ficticia
+            var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(_usuario.Id.Value);
+            var mascota = mascotas?.FirstOrDefault() ?? new Mascota { Id = 0, Nombre = "Mascota General" };
+
+            await Navigation.PushAsync(new vPagos(
+                usuario: _usuario,
+                servicio: servicioPlan,
+                mascota: mascota,
+                fechaServicio: DateTime.Now,
+                reservaId: 0,
+                planSeleccionado: _planSeleccionado));
+        }
     }
 
     private async Task CargarReservasPendientes()

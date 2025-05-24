@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vAprobarPagos"
+             Title="Aprobar Pagos">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <Label Text="Comprobantes Pendientes"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"/>
+
+                <CollectionView x:Name="cvComprobantes">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="15" CornerRadius="10" HasShadow="True">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <Label Text="{Binding Description}"
+                                           Grid.Column="0"
+                                           Grid.Row="0"
+                                           FontSize="16"/>
+                                    <Label Text="{Binding FechaSubida, StringFormat='{0:dd/MM/yyyy}'}"
+                                           Grid.Column="0"
+                                           Grid.Row="1"
+                                           FontSize="14"
+                                           TextColor="Gray"/>
+                                    <Label Text="{Binding Estado}"
+                                           Grid.Column="1"
+                                           Grid.Row="0"
+                                           FontAttributes="Bold"/>
+                                    <Button x:Name="btnRevisarPagos" Text="Revisar"
+                                            Grid.Column="1"
+                                            Grid.Row="1"
+                                            BackgroundColor="#4CAF50"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="btnRevisarPagos_Clicked"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+        <Button x:Name="btnVolver" Text="Volver"
+                Grid.Row="1"
+                Clicked="btnVolver_Clicked"/>
+    </Grid>
+</ContentPage>

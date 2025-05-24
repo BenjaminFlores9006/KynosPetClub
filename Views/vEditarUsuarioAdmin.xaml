@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vEditarUsuarioAdmin"
+             Title="Editar Usuario - Admin">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="Editar Usuario"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Foto de perfil -->
+            <Frame HorizontalOptions="Center"
+                   CornerRadius="75"
+                   HeightRequest="150"
+                   WidthRequest="150"
+                   HasShadow="True">
+                <Image Source="{Binding Usuario.foto, TargetNullValue='default_user.png'}"
+                       Aspect="AspectFill"/>
+            </Frame>
+
+            <!-- Campos editables -->
+            <Label Text="Nombre:" FontAttributes="Bold"/>
+            <Entry Text="{Binding Usuario.nombre}"/>
+
+            <Label Text="Apellido:" FontAttributes="Bold"/>
+            <Entry Text="{Binding Usuario.apellido}"/>
+
+            <Label Text="Correo:" FontAttributes="Bold"/>
+            <Entry Text="{Binding Usuario.correo}" Keyboard="Email"/>
+
+            <Label Text="Fecha de Nacimiento:" FontAttributes="Bold"/>
+            <DatePicker Date="{Binding Usuario.fechanac}"/>
+
+            <!-- Selección de Rol -->
+            <Label Text="Rol:" FontAttributes="Bold"/>
+            <Picker ItemsSource="{Binding Roles}"
+                    ItemDisplayBinding="{Binding NombreRol}"
+                    SelectedItem="{Binding RolSeleccionado}"/>
+
+            <!-- Selección de Plan -->
+            <Label Text="Plan:" FontAttributes="Bold"/>
+            <Picker ItemsSource="{Binding Planes}"
+                    ItemDisplayBinding="{Binding Nombre}"
+                    SelectedItem="{Binding PlanSeleccionado}"/>
+
+            <!-- Botones -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button x:Name="btnGuardar" Text="Guardar"
+                        Grid.Column="0"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        Clicked="btnGuardar_Clicked"/>
+
+                <Button x:Name="btnCancelar" Text="Cancelar"
+                        Grid.Column="1"
+                        BackgroundColor="#F44336"
+                        TextColor="White"
+                        Clicked="btnCancelar_Clicked"/>
+            </Grid>
+
+            <Label Text="{Binding MensajeError}"
+                   TextColor="Red"
+                   HorizontalTextAlignment="Center"/>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

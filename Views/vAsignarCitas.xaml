@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KynosPetClub.Views.vAsignarCitas"
+             Title="Asignar Citas">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
+                <Label Text="Citas Pendientes de Asignación"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"/>
+
+                <CollectionView x:Name="cvReservas">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Padding="15" CornerRadius="10" HasShadow="True">
+                                <VerticalStackLayout Spacing="10">
+                                    <Label Text="{Binding Servicio.Nombre}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"/>
+                                    <Label Text="{Binding FechaServicio, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                           FontSize="14"/>
+                                    <Label Text="{Binding Mascota.Nombre}"
+                                           FontSize="14"/>
+
+                                    <Picker x:Name="pickerFuncionarios"
+                                            Title="Seleccionar funcionario"
+                                            ItemDisplayBinding="{Binding nombre}"
+                                            SelectedItem="{Binding FuncionarioAsignado}"/>
+
+                                    <Button x:Name="btnAsignar" Text="Asignar"
+                                            BackgroundColor="#4CAF50"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="btnAsignar_Clicked"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+        <Button x:Name="btnVolver" Text="Volver"
+                Grid.Row="1"
+                Clicked="btnVolver_Clicked"/>
+    </Grid>
+</ContentPage>
