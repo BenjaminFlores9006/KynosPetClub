@@ -569,9 +569,50 @@ namespace KynosPetClub.Services
             }
         }
 
-        // Agregar estos métodos a tu clase ApiService
+        // AGREGA este método a tu ApiService para debug
+        public async Task DebugComprobantesAsync(int usuarioId)
+        {
+            try
+            {
+                var comprobantes = await ObtenerComprobantesUsuarioAsync(usuarioId);
+                var reservas = await ObtenerReservasUsuarioAsync(usuarioId);
 
-        // Agregar este método al final de tu clase ApiService existente
+                Console.WriteLine("=== DEBUG COMPROBANTES ===");
+                Console.WriteLine($"Total comprobantes: {comprobantes?.Count ?? 0}");
+                Console.WriteLine($"Total reservas: {reservas?.Count ?? 0}");
+
+                if (comprobantes != null)
+                {
+                    foreach (var comp in comprobantes)
+                    {
+                        Console.WriteLine($"Comprobante ID: {comp.Id}");
+                        Console.WriteLine($"  - ReservaId: {comp.ReservaId}");
+                        Console.WriteLine($"  - UsuarioId: {comp.UsuarioId}");
+                        Console.WriteLine($"  - Estado: {comp.Estado}");
+                        Console.WriteLine($"  - Descripción: {comp.Descripcion}");
+                        Console.WriteLine("---");
+                    }
+                }
+
+                if (reservas != null)
+                {
+                    foreach (var res in reservas)
+                    {
+                        Console.WriteLine($"Reserva ID: {res.Id}");
+                        Console.WriteLine($"  - Estado: {res.Estado}");
+                        Console.WriteLine($"  - ServicioId: {res.ServicioId}");
+                        Console.WriteLine($"  - Fecha: {res.FechaServicio}");
+                        Console.WriteLine("---");
+                    }
+                }
+
+                Console.WriteLine("=== FIN DEBUG ===");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en debug: {ex.Message}");
+            }
+        }
 
         public async Task<string> AutenticarConSupabaseAsync(string email, string password)
         {
@@ -754,28 +795,81 @@ namespace KynosPetClub.Services
 
         // Versión simplificada sin opciones JSON:
 
+        // ELIMINA el método ObtenerComprobantesUsuarioAsync incorrecto y reemplázalo con este:
         public async Task<List<Comprobante>> ObtenerComprobantesUsuarioAsync(int usuarioId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/comprobantes/usuario/{usuarioId}");
+                Console.WriteLine($"🔍 Obteniendo comprobantes para usuario {usuarioId}");
 
-                if (response.IsSuccessStatusCode)
+                // 🔧 URL CORRECTA para Supabase
+                var url = $"{_supabaseUrl}/comprobante?usuario_id=eq.{usuarioId}";
+                Console.WriteLine($"📋 URL: {url}");
+
+                var response = await _httpClient.GetAsync(url);
+                var content = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"📊 Status: {response.StatusCode}");
+                Console.WriteLine($"📋 Response: {content}");
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    var comprobantes = JsonSerializer.Deserialize<List<Comprobante>>(json);
-                    return comprobantes ?? new List<Comprobante>();
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error al obtener comprobantes: {response.StatusCode}");
+                    Console.WriteLine($"❌ Error HTTP: {response.StatusCode} - {content}");
                     return new List<Comprobante>();
                 }
+
+                if (string.IsNullOrEmpty(content) || content == "[]")
+                {
+                    Console.WriteLine("ℹ️ No hay comprobantes para este usuario");
+                    return new List<Comprobante>();
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var comprobantes = JsonSerializer.Deserialize<List<Comprobante>>(content, options);
+                Console.WriteLine($"✅ Comprobantes deserializados: {comprobantes?.Count ?? 0}");
+
+                return comprobantes ?? new List<Comprobante>();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Excepción al obtener comprobantes: {ex.Message}");
+                Console.WriteLine($"❌ Excepción al obtener comprobantes: {ex.Message}");
+                Console.WriteLine($"🔍 StackTrace: {ex.StackTrace}");
                 return new List<Comprobante>();
+            }
+        }
+
+        // AGREGA este método a tu ApiService
+        public async Task<bool> VerificarComprobanteParaReservaAsync(int reservaId, int usuarioId)
+        {
+            try
+            {
+                Console.WriteLine($"🔍 Verificando comprobante para reserva {reservaId}");
+
+                var comprobantes = await ObtenerComprobantesUsuarioAsync(usuarioId);
+
+                if (comprobantes == null || !comprobantes.Any())
+                {
+                    Console.WriteLine($"❌ No hay comprobantes para usuario {usuarioId}");
+                    return false;
+                }
+
+                // Verificar si existe comprobante para esta reserva
+                bool tieneComprobante = comprobantes.Any(c => c.ReservaId == reservaId);
+
+                Console.WriteLine($"✅ ¿Reserva {reservaId} tiene comprobante? {tieneComprobante}");
+
+                // Debug: mostrar todos los ReservaId de los comprobantes
+                foreach (var comp in comprobantes)
+                {
+                    Console.WriteLine($"  📄 Comprobante {comp.Id}: ReservaId={comp.ReservaId}");
+                }
+
+                return tieneComprobante;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error verificando comprobante: {ex.Message}");
+                return false;
             }
         }
 

@@ -1,6 +1,4 @@
-﻿// Agrega este código completo a tu vReserva.xaml.cs:
-
-using KynosPetClub.Models;
+﻿using KynosPetClub.Models;
 using KynosPetClub.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -43,6 +41,9 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
             loadingIndicator.IsRunning = true;
             emptyStateLayout.IsVisible = false;
 
+            // 🔧 AÑADIR DEBUG
+            await _apiService.DebugComprobantesAsync(_usuario.Id.Value);
+
             // Obtener datos en paralelo
             var reservasTask = _apiService.ObtenerReservasUsuarioAsync(_usuario.Id.Value);
             var serviciosTask = _apiService.ObtenerServiciosAsync();
@@ -70,8 +71,37 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
                 var servicio = servicios.FirstOrDefault(s => s.Id == reserva.ServicioId);
                 var mascota = mascotas.FirstOrDefault(m => m.Id == reserva.MascotaId);
 
-                // Verificar si tiene comprobante
-                var tieneComprobante = comprobantes.Any(c => c.ReservaId == reserva.Id);
+                // 🔧 LÓGICA MEJORADA para detectar comprobantes
+                bool tieneComprobante = false;
+
+                // Buscar comprobante de múltiples formas
+                foreach (var comp in comprobantes)
+                {
+                    // Verificar por ReservaId exacto
+                    if (comp.ReservaId == reserva.Id)
+                    {
+                        tieneComprobante = true;
+                        Console.WriteLine($"✅ Comprobante encontrado por ReservaId: {comp.ReservaId} = {reserva.Id}");
+                        break;
+                    }
+
+                    // Verificar por descripción (backup)
+                    if (!string.IsNullOrEmpty(comp.Descripcion) &&
+                        servicio != null &&
+                        comp.Descripcion.Contains(servicio.Nombre))
+                    {
+                        // Verificar que las fechas sean cercanas (dentro de 24 horas)
+                        var diferencia = Math.Abs((comp.FechaSubida - reserva.FechaServicio).TotalHours);
+                        if (diferencia <= 24)
+                        {
+                            tieneComprobante = true;
+                            Console.WriteLine($"✅ Comprobante encontrado por descripción: {comp.Descripcion}");
+                            break;
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Reserva {reserva.Id} - Tiene comprobante: {tieneComprobante}");
 
                 var viewModel = new ReservaViewModel
                 {
@@ -83,13 +113,10 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
                     Servicio = servicio,
                     MascotaInfo = mascota != null ? $"{mascota.Nombre} ({mascota.Especie})" : "Mascota desconocida",
                     ColorEstado = ObtenerColorEstado(reserva.Estado),
-
-                    // ✅ CORREGIDO: El botón cancelar se muestra siempre EXCEPTO si ya está cancelado
                     PuedeCancelarse = reserva.Estado != "Cancelado" && reserva.Estado != "Completado",
-
                     TieneComentarios = !string.IsNullOrWhiteSpace(reserva.Comentarios),
 
-                    // Mostrar "Pendiente de pago" si no tiene comprobante
+                    // 🔧 CORREGIDO: Solo mostrar "Pendiente de pago" si NO tiene comprobante
                     MostrarPendientePago = !tieneComprobante,
                     ReservaOriginal = reserva
                 };
@@ -143,7 +170,7 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
             {
                 string detalles = $"📋 Detalles de la Reserva\n\n" +
                     $"🏥 Servicio: {reserva.Servicio?.Nombre ?? "N/A"}\n" +
-                    $"💰 Precio: {(reserva.Servicio?.Precio ?? 0):C}\n" + // CORREGIDO: Formato de precio
+                    $"💰 Precio: {(reserva.Servicio?.Precio ?? 0):C}\n" +
                     $"🐕 Mascota: {reserva.MascotaInfo}\n" +
                     $"📅 Fecha: {reserva.FechaServicioFormateada}\n" +
                     $"📊 Estado: {reserva.Estado}\n";
@@ -151,6 +178,10 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
                 if (reserva.MostrarPendientePago)
                 {
                     detalles += $"⚠️ Estado de Pago: Pendiente de pago\n";
+                }
+                else
+                {
+                    detalles += $"✅ Estado de Pago: Pago registrado\n";
                 }
 
                 if (reserva.TieneComentarios)
@@ -185,7 +216,6 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
 
                 if (confirmar)
                 {
-                    // Usar tu método existente ActualizarReservaAsync
                     var reservaParaActualizar = reserva.ReservaOriginal;
                     reservaParaActualizar.Estado = "Cancelado";
 
@@ -241,6 +271,6 @@ public class ReservaViewModel
     public Color ColorEstado { get; set; }
     public bool PuedeCancelarse { get; set; }
     public bool TieneComentarios { get; set; }
-    public bool MostrarPendientePago { get; set; } // NUEVA PROPIEDAD
+    public bool MostrarPendientePago { get; set; }
     public Reserva ReservaOriginal { get; set; }
 }

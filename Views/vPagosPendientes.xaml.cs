@@ -1,4 +1,4 @@
-using KynosPetClub.Models;
+﻿using KynosPetClub.Models;
 using KynosPetClub.Services;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -32,7 +32,7 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
         base.OnAppearing();
         await CargarReservasPendientes();
 
-        // Si hay un plan seleccionado, mostrar opci�n para pagarlo
+        // Si hay un plan seleccionado, mostrar opción para pagarlo
         if (_planSeleccionado != null)
         {
             await MostrarOpcionPagoPlan();
@@ -42,8 +42,8 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
     private async Task MostrarOpcionPagoPlan()
     {
         bool confirmar = await DisplayAlert("Adquirir Plan",
-            $"�Deseas proceder con el pago del plan {_planSeleccionado.Nombre} por {_planSeleccionado.Precio:C}?",
-            "S�, Pagar Ahora", "M�s Tarde");
+            $"¿Deseas proceder con el pago del plan {_planSeleccionado.Nombre} por {_planSeleccionado.Precio:C}?",
+            "Sí, Pagar Ahora", "Más Tarde");
 
         if (confirmar)
         {
@@ -74,23 +74,27 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
     {
         try
         {
+            // 🔧 AÑADIR DEBUG
+            await _apiService.DebugComprobantesAsync(_usuario.Id.Value);
+
             // Obtener todas las reservas del usuario
             var reservas = await _apiService.ObtenerReservasUsuarioAsync(_usuario.Id.Value);
 
             if (reservas == null || !reservas.Any())
             {
                 ReservasPendientesPago.Clear();
+                MostrarEstadoVacio();
                 return;
             }
 
-            // Obtener servicios y mascotas para mostrar informaci�n completa
+            // Obtener servicios y mascotas para mostrar información completa
             var servicios = await _apiService.ObtenerServiciosAsync();
             var mascotas = await _apiService.ObtenerMascotasUsuarioAsync(_usuario.Id.Value);
 
             // Obtener comprobantes del usuario
             var comprobantes = await _apiService.ObtenerComprobantesUsuarioAsync(_usuario.Id.Value) ?? new List<Comprobante>();
 
-            // L�GICA NUEVA: Solo mostrar reservas que NO tienen comprobante asociado
+            // 🔧 LÓGICA MEJORADA: Solo mostrar reservas que NO tienen comprobante asociado
             var reservasSinComprobante = new List<Reserva>();
 
             foreach (var reserva in reservas)
@@ -99,8 +103,38 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
                 if (reserva.Estado == "Cancelado" || reserva.Estado == "Completado")
                     continue;
 
-                // Verificar si esta reserva tiene alg�n comprobante asociado
-                var tieneComprobante = comprobantes.Any(c => c.ReservaId == reserva.Id);
+                var servicio = servicios?.FirstOrDefault(s => s.Id == reserva.ServicioId);
+
+                // 🔧 VERIFICAR COMPROBANTE DE MÚLTIPLES FORMAS
+                bool tieneComprobante = false;
+
+                foreach (var comp in comprobantes)
+                {
+                    // Verificar por ReservaId exacto
+                    if (comp.ReservaId == reserva.Id)
+                    {
+                        tieneComprobante = true;
+                        Console.WriteLine($"✅ Comprobante encontrado para reserva {reserva.Id} por ReservaId");
+                        break;
+                    }
+
+                    // Verificar por descripción (backup)
+                    if (!string.IsNullOrEmpty(comp.Descripcion) &&
+                        servicio != null &&
+                        comp.Descripcion.Contains(servicio.Nombre))
+                    {
+                        // Verificar que las fechas sean cercanas (dentro de 24 horas)
+                        var diferencia = Math.Abs((comp.FechaSubida - reserva.FechaServicio).TotalHours);
+                        if (diferencia <= 24)
+                        {
+                            tieneComprobante = true;
+                            Console.WriteLine($"✅ Comprobante encontrado para reserva {reserva.Id} por descripción");
+                            break;
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Reserva {reserva.Id} - Tiene comprobante: {tieneComprobante}");
 
                 // Si NO tiene comprobante, necesita pago
                 if (!tieneComprobante)
@@ -132,22 +166,36 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
                 })
                 .ToList();
 
-            // Actualizar la colecci�n
+            // Actualizar la colección
             ReservasPendientesPago.Clear();
             foreach (var reserva in reservasParaMostrar)
             {
                 ReservasPendientesPago.Add(reserva);
             }
 
-            // Debug
-            System.Diagnostics.Debug.WriteLine($"Reservas totales: {reservas.Count()}");
-            System.Diagnostics.Debug.WriteLine($"Comprobantes totales: {comprobantes.Count}");
-            System.Diagnostics.Debug.WriteLine($"Reservas sin comprobante: {reservasParaMostrar.Count}");
+            // 🔧 MOSTRAR ESTADO CORRECTO
+            MostrarEstadoVacio();
+
+            // Debug final
+            Console.WriteLine($"📊 RESUMEN:");
+            Console.WriteLine($"  - Reservas totales: {reservas.Count()}");
+            Console.WriteLine($"  - Comprobantes totales: {comprobantes.Count}");
+            Console.WriteLine($"  - Reservas sin comprobante: {reservasParaMostrar.Count}");
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", $"Error al cargar reservas pendientes: {ex.Message}", "OK");
         }
+    }
+
+    private void MostrarEstadoVacio()
+    {
+        bool hayPagosPendientes = ReservasPendientesPago.Any();
+
+        collectionViewPagosPendientes.IsVisible = hayPagosPendientes;
+        stackNoPayments.IsVisible = !hayPagosPendientes;
+
+        Console.WriteLine($"🎯 Estado UI - Hay pagos pendientes: {hayPagosPendientes}");
     }
 
     private async void btnPagar_Clicked(object sender, EventArgs e)
@@ -176,7 +224,7 @@ public partial class vPagosPendientes : ContentPage, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Error al abrir p�gina de pago: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Error al abrir página de pago: {ex.Message}", "OK");
         }
     }
 
