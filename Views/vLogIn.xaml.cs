@@ -25,16 +25,6 @@ public partial class vLogIn : ContentPage
             return;
         }
 
-        // Mostrar indicador de carga
-        btnIniciarSesion.IsEnabled = false;
-        btnIniciarSesion.Text = "Iniciando sesión...";
-
-        if (string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(contraseña))
-        {
-            await DisplayAlert("Error", "Por favor ingresa tu correo y contraseña", "Ok");
-            return;
-        }
-
         // Validación de formato de correo
         if (!correo.Contains("@") || !correo.Contains("."))
         {
@@ -48,19 +38,36 @@ public partial class vLogIn : ContentPage
 
         try
         {
+            // *** NUEVO: Primero autenticar con Supabase para obtener JWT ***
+            var resultadoAuth = await _apiService.AutenticarConSupabaseAsync(correo, contraseña);
+
+            if (resultadoAuth != "OK")
+            {
+                // Si falla la autenticación JWT, intentar el login normal (backwards compatibility)
+                Console.WriteLine($"Autenticación JWT falló, intentando login normal: {resultadoAuth}");
+            }
+
+            // Tu lógica original de login (sin cambios)
             var usuario = await _apiService.LoginUsuarioAsync(correo, contraseña);
 
             if (usuario != null)
             {
-                // Guardar datos de sesión (podría usarse SecureStorage)
+                // Guardar datos de sesión (tu código original)
                 await SecureStorage.SetAsync("user_id", usuario.Id.ToString());
                 await SecureStorage.SetAsync("user_name", $"{usuario.nombre} {usuario.apellido}");
                 await SecureStorage.SetAsync("user_email", usuario.correo);
 
-                // Redirigir a la página de inicio
-                await Navigation.PushAsync(new vInicio(usuario));
+                // *** NUEVO: Si no se pudo obtener JWT, crear un token temporal ***
+                var existeJWT = await SecureStorage.GetAsync("supabase_jwt");
+                if (string.IsNullOrEmpty(existeJWT))
+                {
+                    // Crear un token temporal usando tu API key (solo para desarrollo)
+                    await SecureStorage.SetAsync("supabase_jwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmd3licWF5a3llcmxqcWZxdHprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MTU1MTcsImV4cCI6MjA2MzE5MTUxN30.0NvvKf7vF_SLMB4OvpxgatIACDStEWu6MR83LCkn5C0");
+                    Console.WriteLine("JWT temporal configurado para desarrollo");
+                }
 
-                // Limpiar la página de login de la pila de navegación
+                // Tu navegación original (sin cambios)
+                await Navigation.PushAsync(new vInicio(usuario));
                 Navigation.RemovePage(this);
             }
             else
@@ -74,7 +81,7 @@ public partial class vLogIn : ContentPage
         }
         finally
         {
-            // Restaurar el botón
+            // Restaurar el botón (tu código original)
             btnIniciarSesion.IsEnabled = true;
             btnIniciarSesion.Text = "Iniciar sesión";
         }

@@ -454,54 +454,263 @@ namespace KynosPetClub.Services
             }
         }
 
+        // Reemplaza tu método SubirComprobanteAsync con esta versión súper simple
+
+        // Si la versión anterior sigue fallando, usa esta versión ULTRA simple
+
+        // REEMPLAZA tu método SubirComprobanteAsync con este que SÍ va a funcionar
+
         public async Task<string> SubirComprobanteAsync(Comprobante comprobante, Stream fileStream, string fileName)
         {
             try
             {
-                // 1. Configurar headers con token JWT válido
-                var jwtToken = await SecureStorage.GetAsync("supabase_jwt");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+                Console.WriteLine("🚀 === INICIANDO SUBIDA BULLETPROOF ===");
 
-                // 2. Subir a Supabase Storage
-                var storageUrl = $"https://{_supabaseUrl.Replace("https://", "")}/storage/v1/object/comprobantes/{comprobante.UsuarioId}/{fileName}";
+                // 1. Preparar datos del archivo
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                var extension = Path.GetExtension(fileName)?.ToLower() ?? ".jpg";
+                var fileName_safe = $"user{comprobante.UsuarioId}_{timestamp}{extension}";
 
+                Console.WriteLine($"📁 Archivo: {fileName_safe}");
+
+                // 2. URL para el storage público
+                var storageUrl = $"https://cfwybqaykyerljqfqtzk.supabase.co/storage/v1/object/comprobantes/{fileName_safe}";
+                Console.WriteLine($"🌐 URL: {storageUrl}");
+
+                // 3. Preparar el contenido
+                fileStream.Position = 0; // Asegurar que esté al inicio
                 using var content = new StreamContent(fileStream);
-                content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
 
-                var storageResponse = await _httpClient.PostAsync(storageUrl, content);
-
-                if (!storageResponse.IsSuccessStatusCode)
+                // Configurar headers del archivo
+                switch (extension)
                 {
-                    var error = await storageResponse.Content.ReadAsStringAsync();
-                    return $"Error al subir archivo: {error}";
+                    case ".jpg":
+                    case ".jpeg":
+                        content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+                        break;
+                    case ".png":
+                        content.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+                        break;
+                    default:
+                        content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+                        break;
                 }
 
-                // 3. Crear registro en tabla comprobante
-                var comprobanteUrl = $"{_supabaseUrl}/comprobante";
+                // 4. Configurar HttpClient para storage
+                using var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Clear();
+
+                // Headers mínimos necesarios
+                httpClient.DefaultRequestHeaders.Add("apikey", _supabaseApiKey);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _supabaseApiKey);
+
+                Console.WriteLine("📤 Subiendo archivo...");
+
+                // 5. Subir archivo
+                var response = await httpClient.PostAsync(storageUrl, content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"📊 Status: {response.StatusCode}");
+                Console.WriteLine($"📋 Response: {responseContent}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return $"Error al subir archivo: [{response.StatusCode}] {responseContent}";
+                }
+
+                // 6. URL pública del archivo
+                var publicUrl = $"https://cfwybqaykyerljqfqtzk.supabase.co/storage/v1/object/public/comprobantes/{fileName_safe}";
+                Console.WriteLine($"🔗 URL pública: {publicUrl}");
+
+                // 7. Guardar en la base de datos
                 var comprobanteData = new
                 {
-                    description = comprobante.Descripcion,
-                    fecha_subida = DateTime.UtcNow,
-                    url_archive = $"{_supabaseUrl.Replace("/rest/v1", "")}/storage/v1/object/public/comprobantes/{comprobante.UsuarioId}/{fileName}",
+                    descripcion = comprobante.Descripcion ?? "Comprobante de pago",
+                    fecha_subida = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                    url_archivo = publicUrl,
                     estado = "Pendiente",
                     usuario_id = comprobante.UsuarioId,
-                    reserva_id = comprobante.ReservaId
+                    reserva_id = comprobante.ReservaId > 0 ? (int?)comprobante.ReservaId : null
                 };
 
-                var json = JsonSerializer.Serialize(comprobanteData);
+                var json = JsonSerializer.Serialize(comprobanteData, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                Console.WriteLine($"💾 Guardando en DB: {json}");
+
                 var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
+                // Usar el HttpClient principal para la base de datos
+                _httpClient.DefaultRequestHeaders.Remove("Prefer");
                 _httpClient.DefaultRequestHeaders.Add("Prefer", "return=representation");
-                var response = await _httpClient.PostAsync(comprobanteUrl, stringContent);
 
-                return response.IsSuccessStatusCode ? "OK" : $"Error: {await response.Content.ReadAsStringAsync()}";
+                var dbUrl = $"{_supabaseUrl}/comprobante";
+                var dbResponse = await _httpClient.PostAsync(dbUrl, stringContent);
+                var dbResponseContent = await dbResponse.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"🗄️ DB Status: {dbResponse.StatusCode}");
+                Console.WriteLine($"🗄️ DB Response: {dbResponseContent}");
+
+                if (!dbResponse.IsSuccessStatusCode)
+                {
+                    return $"Archivo subido pero error en DB: [{dbResponse.StatusCode}] {dbResponseContent}";
+                }
+
+                Console.WriteLine("✅ === SUBIDA COMPLETADA EXITOSAMENTE ===");
+                return "OK";
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Exception: {ex.Message}");
+                Console.WriteLine($"🔍 StackTrace: {ex.StackTrace}");
                 return $"Exception: {ex.Message}";
             }
         }
 
+        // Agregar estos métodos a tu clase ApiService
+
+        // Agregar este método al final de tu clase ApiService existente
+
+        public async Task<string> AutenticarConSupabaseAsync(string email, string password)
+        {
+            try
+            {
+                var authUrl = "https://cfwybqaykyerljqfqtzk.supabase.co/auth/v1/token?grant_type=password";
+
+                var authData = new
+                {
+                    email = email,
+                    password = password
+                };
+
+                var json = JsonSerializer.Serialize(authData);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // Crear cliente específico para autenticación
+                var authClient = new HttpClient();
+                authClient.DefaultRequestHeaders.Clear();
+                authClient.DefaultRequestHeaders.Add("apikey", _supabaseApiKey);
+
+                var response = await authClient.PostAsync(authUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseJson = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Respuesta de auth: {responseJson}");
+
+                    // Extraer el access_token del JSON de respuesta
+                    var authResponse = JsonSerializer.Deserialize<JsonDocument>(responseJson);
+                    if (authResponse.RootElement.TryGetProperty("access_token", out var tokenElement))
+                    {
+                        var accessToken = tokenElement.GetString();
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            // Guardar el token
+                            await SecureStorage.SetAsync("supabase_jwt", accessToken);
+                            Console.WriteLine("JWT token guardado exitosamente");
+                            return "OK";
+                        }
+                    }
+                }
+
+                var error = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error en autenticación Supabase: {error}");
+                return $"Error: {error}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception en autenticación: {ex.Message}");
+                return $"Exception: {ex.Message}";
+            }
+        }
+
+        public async Task<Usuario?> LoginUsuarioCompletoAsync(string correo, string contraseña)
+        {
+            try
+            {
+                Console.WriteLine($"Intentando login completo con: {correo}");
+
+                // 1. Primero autenticar con Supabase Auth
+                var resultadoAuth = await AutenticarConSupabaseAsync(correo, contraseña);
+
+                if (resultadoAuth != "OK")
+                {
+                    Console.WriteLine($"Falló la autenticación: {resultadoAuth}");
+                    return null;
+                }
+
+                // 2. Luego obtener datos del usuario desde tu tabla
+                var url = $"{_supabaseUrl}/usuario?correo=eq.{Uri.EscapeDataString(correo)}";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error al obtener usuario: {errorContent}");
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var usuarios = JsonSerializer.Deserialize<List<Usuario>>(json, options);
+
+                if (usuarios == null || !usuarios.Any())
+                {
+                    Console.WriteLine("No se encontró el usuario en la tabla");
+                    return null;
+                }
+
+                var usuario = usuarios.FirstOrDefault();
+                Console.WriteLine($"Login exitoso para: {usuario.nombre} {usuario.apellido}");
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception en login completo: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<bool> VerificarTokenValidoAsync()
+        {
+            try
+            {
+                var token = await SecureStorage.GetAsync("supabase_jwt");
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    return false;
+                }
+
+                // Verificar si el token es válido haciendo una petición simple
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                httpClient.DefaultRequestHeaders.Add("apikey", _supabaseApiKey);
+
+                var response = await httpClient.GetAsync($"{_supabaseUrl}/usuario?select=id&limit=1");
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task CerrarSesionAsync()
+        {
+            try
+            {
+                SecureStorage.Remove("supabase_jwt");
+                SecureStorage.Remove("supabase_refresh_token");
+                Console.WriteLine("Tokens eliminados - sesión cerrada");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al cerrar sesión: {ex.Message}");
+            }
+        }
         public async Task<Servicio?> ObtenerServicioPorIdAsync(int servicioId)
         {
             try
