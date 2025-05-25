@@ -206,75 +206,47 @@ public partial class vAprobarPagos : ContentPage, INotifyPropertyChanged
 
                 IsLoading = true;
 
-                // Actualizar estado del comprobante
+                // 1. Actualizar estado del comprobante
                 comprobante.ComprobanteOriginal.Estado = "Rechazado";
                 comprobante.ComprobanteOriginal.ComentarioAdmin = motivo;
 
-                var resultado = await _apiService.ActualizarComprobanteAsync(comprobante.ComprobanteOriginal);
+                var resultadoComprobante = await _apiService.ActualizarComprobanteAsync(comprobante.ComprobanteOriginal);
 
-                if (resultado)
+                if (!resultadoComprobante)
                 {
-                    // Remover de la lista (ya no es pendiente)
-                    Comprobantes.Remove(comprobante);
-                    _todosComprobantes.Remove(comprobante);
-                    ActualizarContador();
+                    await DisplayAlert("Error", "❌ No se pudo actualizar el comprobante", "OK");
+                    return;
+                }
 
-                    await DisplayAlert("Éxito", "✅ Comprobante rechazado", "OK");
-                }
-                else
+                // 2. CAMBIAR ESTADO DE LA RESERVA A "Cancelado"
+                var reservas = await _apiService.ObtenerReservasUsuarioAsync(comprobante.UsuarioId);
+                var reserva = reservas?.FirstOrDefault(r => r.Id == comprobante.ReservaId);
+
+                if (reserva != null)
                 {
-                    await DisplayAlert("Error", "❌ No se pudo rechazar el comprobante", "OK");
+                    reserva.Estado = "Cancelado";
+                    reserva.Comentarios = string.IsNullOrEmpty(reserva.Comentarios)
+                        ? $"PAGO RECHAZADO: {motivo}"
+                        : $"{reserva.Comentarios}\n\nPAGO RECHAZADO: {motivo}";
+
+                    var resultadoReserva = await _apiService.ActualizarReservaAsync(reserva);
+
+                    if (!resultadoReserva)
+                    {
+                        await DisplayAlert("Advertencia", "⚠️ Comprobante rechazado pero no se pudo cancelar la reserva", "OK");
+                    }
                 }
+
+                // 3. Remover de la lista (ya no es pendiente)
+                Comprobantes.Remove(comprobante);
+                _todosComprobantes.Remove(comprobante);
+                ActualizarContador();
+
+                await DisplayAlert("Éxito", "✅ Comprobante rechazado y reserva cancelada", "OK");
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Error", $"❌ Error al rechazar: {ex.Message}", "OK");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-    }
-
-    private async void btnComentar_Clicked(object sender, EventArgs e)
-    {
-        if (sender is Button button && button.CommandParameter is ComprobanteViewModel comprobante)
-        {
-            try
-            {
-                string comentario = await DisplayPromptAsync(
-                    "Agregar Comentario",
-                    "Ingresa un comentario para el usuario:",
-                    "Guardar",
-                    "Cancelar",
-                    placeholder: "Ej: Favor enviar imagen más clara...");
-
-                if (string.IsNullOrEmpty(comentario)) return;
-
-                IsLoading = true;
-
-                // Actualizar comentario (mantener estado pendiente)
-                comprobante.ComprobanteOriginal.ComentarioAdmin = comentario;
-
-                var resultado = await _apiService.ActualizarComprobanteAsync(comprobante.ComprobanteOriginal);
-
-                if (resultado)
-                {
-                    // Actualizar el ViewModel
-                    comprobante.ComentarioAdmin = comentario;
-                    comprobante.OnPropertyChanged(nameof(comprobante.TieneComentarioAdmin));
-
-                    await DisplayAlert("Éxito", "✅ Comentario agregado", "OK");
-                }
-                else
-                {
-                    await DisplayAlert("Error", "❌ No se pudo agregar el comentario", "OK");
-                }
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlert("Error", $"❌ Error al comentar: {ex.Message}", "OK");
             }
             finally
             {

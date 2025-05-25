@@ -409,47 +409,66 @@ namespace KynosPetClub.Services
         {
             try
             {
-                string url = $"{_supabaseUrl}/reserva?id=eq.{reserva.Id}";
+                Console.WriteLine($"🔄 INICIANDO: Actualizar reserva ID: {reserva.Id} a estado: {reserva.Estado}");
 
-                // Validar que el estado sea uno de los válidos
-                var estadosValidos = new[] { "Pendiente", "En curso", "Completado", "Cancelado" };
-                if (!estadosValidos.Contains(reserva.Estado))
-                {
-                    Console.WriteLine($"Estado inválido: {reserva.Estado}");
-                    return false;
-                }
+                var url = $"{_supabaseUrl}/reserva?id=eq.{reserva.Id}";
+                Console.WriteLine($"🔍 URL: {url}");
 
-                var reservaData = new
+                // Crear objeto con todos los campos necesarios
+                var updateData = new
                 {
-                    fecha_servicio = reserva.FechaServicio.ToString("yyyy-MM-ddTHH:mm:ss"),
                     estado = reserva.Estado,
-                    comentarios = reserva.Comentarios
+                    comentarios = reserva.Comentarios,
+                    fecha_reserva = reserva.FechaReserva.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                    fecha_servicio = reserva.FechaServicio.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
+                    usuario_id = reserva.UsuarioId,
+                    mascota_id = reserva.MascotaId,
+                    servicio_id = reserva.ServicioId
                 };
 
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = true
-                };
+                var json = JsonSerializer.Serialize(updateData);
+                Console.WriteLine($"📤 JSON enviado: {json}");
 
-                var json = JsonSerializer.Serialize(reservaData, options);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                Console.WriteLine($"Actualizando reserva {reserva.Id}: {json}");
+                // Agregar headers necesarios para Supabase
+                content.Headers.Clear();
+                content.Headers.Add("Content-Type", "application/json");
 
                 var response = await _httpClient.PatchAsync(url, content);
 
+                Console.WriteLine($"📡 Response status: {response.StatusCode}");
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"Error al actualizar reserva: {errorContent}");
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error response: {error}");
+                    Console.WriteLine($"❌ Headers de la respuesta: {response.Headers}");
+
+                    // Intentar con PUT si PATCH falla
+                    Console.WriteLine("🔄 Intentando con PUT...");
+                    var putResponse = await _httpClient.PutAsync(url, content);
+                    Console.WriteLine($"📡 PUT Response status: {putResponse.StatusCode}");
+
+                    if (!putResponse.IsSuccessStatusCode)
+                    {
+                        var putError = await putResponse.Content.ReadAsStringAsync();
+                        Console.WriteLine($"❌ PUT Error response: {putError}");
+                        return false;
+                    }
+
+                    return true;
                 }
 
-                return response.IsSuccessStatusCode;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"✅ Response exitoso: {responseContent}");
+
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al actualizar reserva: {ex.Message}");
+                Console.WriteLine($"❌ EXCEPCIÓN al actualizar reserva: {ex.Message}");
+                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -1064,5 +1083,42 @@ namespace KynosPetClub.Services
                 return new List<Usuario>();
             }
         }
+
+        public void DebugHeaders()
+        {
+            Console.WriteLine("🔍 DEBUGGING HEADERS DEL HTTPCLIENT:");
+            Console.WriteLine($"📍 Base URL: {_httpClient.BaseAddress}");
+
+            foreach (var header in _httpClient.DefaultRequestHeaders)
+            {
+                Console.WriteLine($"📋 Header: {header.Key} = {string.Join(", ", header.Value)}");
+            }
+        }
+
+        // TAMBIÉN agrega este método para probar la conexión:
+        public async Task<bool> TestConexionAsync()
+        {
+            try
+            {
+                Console.WriteLine("🧪 PROBANDO CONEXIÓN A SUPABASE...");
+
+                var url = $"{_supabaseUrl}/reserva?id=eq.48"; // Probar con la reserva específica
+                Console.WriteLine($"🔍 URL de prueba: {url}");
+
+                var response = await _httpClient.GetAsync(url);
+                Console.WriteLine($"📡 Test response status: {response.StatusCode}");
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"📄 Test response content: {content}");
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error en test de conexión: {ex.Message}");
+                return false;
+            }
+        }
+
     }
 }

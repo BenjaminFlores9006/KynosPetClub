@@ -120,8 +120,8 @@
                                             </StackLayout>
                                         </Frame>
 
-                                        <!-- Botones de acción (solo para pendientes) -->
-                                        <Grid ColumnDefinitions="*,*,*" 
+                                        <!-- Botones de acción - SOLO APROBAR Y RECHAZAR -->
+                                        <Grid ColumnDefinitions="*,*" 
                                               ColumnSpacing="10"
                                               IsVisible="{Binding EsPendiente}">
                                             <Button Grid.Column="0"
@@ -141,15 +141,6 @@
                                                     FontSize="12"
                                                     CommandParameter="{Binding .}"
                                                     Clicked="btnRechazar_Clicked"/>
-
-                                            <Button Grid.Column="2"
-                                                    Text="💬 Comentar"
-                                                    BackgroundColor="#FF9800"
-                                                    TextColor="White"
-                                                    CornerRadius="8"
-                                                    FontSize="12"
-                                                    CommandParameter="{Binding .}"
-                                                    Clicked="btnComentar_Clicked"/>
                                         </Grid>
                                     </StackLayout>
                                 </Frame>
