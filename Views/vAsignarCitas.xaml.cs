@@ -63,6 +63,7 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
         try
         {
             IsLoading = true;
+            Console.WriteLine("🔄 Iniciando carga de datos para asignación...");
 
             // Cargar datos en paralelo
             var reservasTask = _apiService.ObtenerReservasPendientesAsignacionAsync();
@@ -75,16 +76,23 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
             var funcionarios = await funcionariosTask;
             var usuarios = await usuariosTask;
 
+            Console.WriteLine($"📊 Datos cargados - Reservas: {reservas.Count}, Funcionarios: {funcionarios.Count}, Usuarios: {usuarios.Count}");
+
             // Cargar funcionarios disponibles
             FuncionariosDisponibles.Clear();
             foreach (var funcionario in funcionarios)
             {
-                FuncionariosDisponibles.Add(new FuncionarioViewModel
+                if (funcionario.Id.HasValue)
                 {
-                    Id = funcionario.Id.Value,
-                    NombreCompleto = $"{funcionario.nombre} {funcionario.apellido}",
-                    Correo = funcionario.correo
-                });
+                    var funcionarioVM = new FuncionarioViewModel
+                    {
+                        Id = funcionario.Id.Value,
+                        NombreCompleto = $"{funcionario.nombre} {funcionario.apellido}",
+                        Correo = funcionario.correo
+                    };
+                    FuncionariosDisponibles.Add(funcionarioVM);
+                    Console.WriteLine($"👨‍⚕️ Funcionario disponible: {funcionarioVM.NombreCompleto}");
+                }
             }
 
             // Crear ViewModels de reservas
@@ -117,14 +125,18 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
                     ReservaOriginal = reserva
                 };
 
+                Console.WriteLine($"🔍 Reserva ID {reserva.Id}: Estado={reserva.Estado}, PuedeAsignar={reservaVM.PuedeAsignar}, TieneFuncionario={reservaVM.TieneFuncionarioAsignado}");
+
                 Reservas.Add(reservaVM);
                 _todasReservas.Add(reservaVM);
             }
 
             ActualizarContador();
+            Console.WriteLine("✅ Carga de datos completada");
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"❌ Error al cargar datos: {ex.Message}");
             await DisplayAlert("Error", $"❌ Error al cargar datos: {ex.Message}", "OK");
         }
         finally
@@ -138,18 +150,28 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
         if (string.IsNullOrEmpty(comentarios))
             return null;
 
-        // Buscar patrón "FUNCIONARIO ASIGNADO: NombreCompleto (ID: 123)"
-        var patron = "FUNCIONARIO ASIGNADO: ";
-        var indice = comentarios.IndexOf(patron);
-        if (indice >= 0)
+        try
         {
-            var inicio = indice + patron.Length;
-            var fin = comentarios.IndexOf(" (ID:", inicio);
-            if (fin > inicio)
+            // Buscar patrón "FUNCIONARIO ASIGNADO: NombreCompleto (ID: 123)"
+            var patron = "FUNCIONARIO ASIGNADO: ";
+            var indice = comentarios.IndexOf(patron);
+            if (indice >= 0)
             {
-                return comentarios.Substring(inicio, fin - inicio);
+                var inicio = indice + patron.Length;
+                var fin = comentarios.IndexOf(" (ID:", inicio);
+                if (fin > inicio)
+                {
+                    var nombreFuncionario = comentarios.Substring(inicio, fin - inicio);
+                    Console.WriteLine($"✅ Funcionario encontrado en comentarios: {nombreFuncionario}");
+                    return nombreFuncionario;
+                }
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error al extraer funcionario de comentarios: {ex.Message}");
+        }
+
         return null;
     }
 
@@ -159,7 +181,8 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
         {
             var sinAsignar = Reservas.Count(r => !r.TieneFuncionarioAsignado);
             var conFuncionario = Reservas.Count(r => r.TieneFuncionarioAsignado);
-            lblContador.Text = $"📋 {sinAsignar} sin asignar • {conFuncionario} con funcionario";
+            lblContador.Text = $"📋 {sinAsignar} sin asignar • {conFuncionario} con funcionario • Total: {Reservas.Count}";
+            Console.WriteLine($"📊 Contador actualizado: {sinAsignar} sin asignar, {conFuncionario} con funcionario");
         }
     }
 
@@ -169,6 +192,8 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
         {
             try
             {
+                Console.WriteLine($"🎯 Iniciando asignación para reserva ID: {reserva.Id}");
+
                 if (reserva.FuncionarioSeleccionado == null)
                 {
                     await DisplayAlert("Error", "⚠️ Selecciona un funcionario primero", "OK");
@@ -177,57 +202,71 @@ public partial class vAsignarCitas : ContentPage, INotifyPropertyChanged
 
                 bool confirmar = await DisplayAlert(
                     "Asignar Funcionario",
-                    $"Esta funcionalidad asignará el funcionario seleccionado a la reserva.\n\n" +
+                    $"¿Asignar funcionario a esta cita?\n\n" +
                     $"🏥 Servicio: {reserva.ServicioNombre}\n" +
                     $"👤 Cliente: {reserva.ClienteNombre}\n" +
-                    $"📅 Fecha: {reserva.FechaServicioTexto}\n" +
+                    $"🐾 Mascota: {reserva.MascotaNombre}\n" +
+                    $"📅 Fecha: {reserva.FechaServicioTexto} a las {reserva.HoraServicioTexto}\n" +
                     $"👨‍⚕️ Funcionario: {reserva.FuncionarioSeleccionado.NombreCompleto}\n\n" +
-                    $"Nota: En tu sistema actual, esta información se guardará como comentario ya que no tienes campo funcionario_id.",
-                    "Continuar",
+                    $"El funcionario podrá ver esta cita en su lista de citas asignadas.",
+                    "Sí, asignar",
                     "Cancelar");
 
                 if (!confirmar) return;
 
                 IsLoading = true;
+                Console.WriteLine($"🔄 Asignando funcionario: {reserva.FuncionarioSeleccionado.NombreCompleto}");
 
-                // Como no tienes funcionario_id, vamos a actualizar los comentarios
-                var comentarioActual = string.IsNullOrEmpty(reserva.Comentarios) ? "" : reserva.Comentarios + "\n";
-                var nuevoComentario = comentarioActual + $"FUNCIONARIO ASIGNADO: {reserva.FuncionarioSeleccionado.NombreCompleto} (ID: {reserva.FuncionarioSeleccionado.Id})";
+                // Preparar el comentario de asignación
+                var comentarioActual = string.IsNullOrEmpty(reserva.Comentarios) ? "" : reserva.Comentarios.Trim();
+
+                // Separar con doble salto de línea si ya hay comentarios
+                var separador = string.IsNullOrEmpty(comentarioActual) ? "" : "\n\n";
+
+                var comentarioAsignacion = $"👨‍⚕️ FUNCIONARIO ASIGNADO: {reserva.FuncionarioSeleccionado.NombreCompleto} (ID: {reserva.FuncionarioSeleccionado.Id})" +
+                                         $"\n📅 Asignado el: {DateTime.Now:dd/MM/yyyy HH:mm}" +
+                                         $"\n👤 Asignado por: {_admin.nombre} {_admin.apellido}";
+
+                var nuevoComentario = comentarioActual + separador + comentarioAsignacion;
+
+                Console.WriteLine($"📝 Comentario a guardar: {nuevoComentario}");
 
                 // Actualizar la reserva
-                reserva.ReservaOriginal.Estado = "En curso";
                 reserva.ReservaOriginal.Comentarios = nuevoComentario;
+                // Mantener el estado "En curso" (ya está así)
 
                 var resultado = await _apiService.ActualizarReservaAsync(reserva.ReservaOriginal);
 
                 if (resultado)
                 {
+                    Console.WriteLine("✅ Reserva actualizada exitosamente");
+
                     // Actualizar el ViewModel
-                    reserva.Estado = "En curso";
                     reserva.Comentarios = nuevoComentario;
                     reserva.FuncionarioAsignadoNombre = reserva.FuncionarioSeleccionado.NombreCompleto;
 
-                    // Notificar cambios
-                    reserva.OnPropertyChanged(nameof(reserva.EstadoColor));
+                    // Notificar cambios de propiedades
                     reserva.OnPropertyChanged(nameof(reserva.TieneFuncionarioAsignado));
                     reserva.OnPropertyChanged(nameof(reserva.PuedeAsignar));
                     reserva.OnPropertyChanged(nameof(reserva.FuncionarioAsignadoTexto));
                     reserva.OnPropertyChanged(nameof(reserva.TieneComentarios));
 
                     ActualizarContador();
-                    OnPropertyChanged(nameof(Reservas));
 
                     await DisplayAlert("Éxito",
                         $"✅ Funcionario asignado correctamente\n\n" +
-                        $"La reserva ahora está 'En curso' y el funcionario ha sido registrado en los comentarios.", "OK");
+                        $"🎯 {reserva.FuncionarioSeleccionado.NombreCompleto} ahora puede ver esta cita en su lista de citas asignadas.\n\n" +
+                        $"📱 La cita aparecerá automáticamente en la app del funcionario.", "OK");
                 }
                 else
                 {
-                    await DisplayAlert("Error", "❌ No se pudo asignar el funcionario", "OK");
+                    Console.WriteLine("❌ Error al actualizar la reserva");
+                    await DisplayAlert("Error", "❌ No se pudo asignar el funcionario. Intenta de nuevo.", "OK");
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error en asignación: {ex.Message}");
                 await DisplayAlert("Error", $"❌ Error al asignar: {ex.Message}", "OK");
             }
             finally
@@ -286,12 +325,18 @@ public class FuncionarioViewModel
     public int Id { get; set; }
     public string NombreCompleto { get; set; }
     public string Correo { get; set; }
+
+    public override string ToString()
+    {
+        return NombreCompleto;
+    }
 }
 
 // ViewModel para reservas en asignación
 public class ReservaAsignacionViewModel : INotifyPropertyChanged
 {
     private FuncionarioViewModel _funcionarioSeleccionado;
+    private string _funcionarioAsignadoNombre;
 
     public int Id { get; set; }
     public DateTime FechaServicio { get; set; }
@@ -306,7 +351,19 @@ public class ReservaAsignacionViewModel : INotifyPropertyChanged
     public string ClienteNombre { get; set; }
     public string MascotaNombre { get; set; }
     public decimal PrecioServicio { get; set; }
-    public string FuncionarioAsignadoNombre { get; set; }
+
+    public string FuncionarioAsignadoNombre
+    {
+        get => _funcionarioAsignadoNombre;
+        set
+        {
+            _funcionarioAsignadoNombre = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(TieneFuncionarioAsignado));
+            OnPropertyChanged(nameof(PuedeAsignar));
+            OnPropertyChanged(nameof(FuncionarioAsignadoTexto));
+        }
+    }
 
     public Reserva ReservaOriginal { get; set; }
 

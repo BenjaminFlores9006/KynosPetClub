@@ -1005,21 +1005,51 @@ namespace KynosPetClub.Services
         {
             try
             {
-                // Obtener solo reservas "Pendiente" que necesitan asignación
-                var url = $"{_supabaseUrl}/reserva?estado=eq.Pendiente&select=*,servicio:servicio_id(*),mascota:mascota_id(*)";
+                Console.WriteLine("🔍 Obteniendo reservas En curso para asignación...");
+
+                var url = $"{_supabaseUrl}/reserva?estado=eq.En%20curso&order=fecha_servicio.asc";
+                Console.WriteLine($"🔗 URL: {url}");
+
                 var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return new List<Reserva>();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"❌ Error HTTP: {response.StatusCode}");
+                    return new List<Reserva>();
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var reservas = JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+                Console.WriteLine($"📄 JSON recibido: {json}");
 
-                // Ordenar por fecha de servicio
-                return reservas.OrderBy(r => r.FechaServicio).ToList();
+                if (string.IsNullOrEmpty(json) || json == "[]")
+                {
+                    Console.WriteLine("📄 No hay reservas En curso");
+                    return new List<Reserva>();
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var reservas = JsonSerializer.Deserialize<List<Reserva>>(json, options);
+
+                // Cargar servicios y mascotas para cada reserva
+                foreach (var reserva in reservas ?? new List<Reserva>())
+                {
+                    if (reserva.ServicioId > 0)
+                    {
+                        reserva.Servicio = await ObtenerServicioPorIdAsync(reserva.ServicioId);
+                    }
+
+                    if (reserva.MascotaId > 0)
+                    {
+                        reserva.Mascota = await ObtenerMascotaPorIdAsync(reserva.MascotaId);
+                    }
+                }
+
+                Console.WriteLine($"✅ Reservas cargadas: {reservas?.Count ?? 0}");
+                return reservas ?? new List<Reserva>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al obtener reservas pendientes: {ex.Message}");
+                Console.WriteLine($"❌ Error al obtener reservas para asignación: {ex.Message}");
                 return new List<Reserva>();
             }
         }
@@ -1028,17 +1058,102 @@ namespace KynosPetClub.Services
         {
             try
             {
-                var url = $"{_supabaseUrl}/reserva?funcionario_id=eq.{funcionarioId}&select=*,servicio:servicio_id(*),mascota:mascota_id(*)";
+                Console.WriteLine($"🔍 Obteniendo citas asignadas al funcionario ID: {funcionarioId}");
+
+                // Primero obtener el nombre del funcionario
+                var funcionario = await ObtenerUsuarioPorIdAsync(funcionarioId);
+                if (funcionario == null)
+                {
+                    Console.WriteLine("❌ Funcionario no encontrado");
+                    return new List<Reserva>();
+                }
+
+                var nombreFuncionario = $"{funcionario.nombre} {funcionario.apellido}";
+                Console.WriteLine($"👤 Buscando citas asignadas a: {nombreFuncionario}");
+
+                // Obtener todas las reservas "En curso"
+                var url = $"{_supabaseUrl}/reserva?estado=eq.En%20curso&order=fecha_servicio.asc";
+                Console.WriteLine($"🔗 URL: {url}");
+
                 var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return new List<Reserva>();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"❌ Error HTTP: {response.StatusCode}");
+                    return new List<Reserva>();
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"📄 JSON reservas: {json}");
+
+                if (string.IsNullOrEmpty(json) || json == "[]")
+                {
+                    Console.WriteLine("📄 No hay reservas En curso");
+                    return new List<Reserva>();
+                }
+
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                return JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+                var todasReservas = JsonSerializer.Deserialize<List<Reserva>>(json, options);
+
+                // Filtrar las que tienen asignado este funcionario en los comentarios
+                var reservasAsignadas = new List<Reserva>();
+
+                foreach (var reserva in todasReservas ?? new List<Reserva>())
+                {
+                    if (!string.IsNullOrEmpty(reserva.Comentarios) &&
+                        reserva.Comentarios.Contains($"FUNCIONARIO ASIGNADO: {nombreFuncionario}"))
+                    {
+                        Console.WriteLine($"✅ Encontrada cita asignada: Reserva ID {reserva.Id}");
+
+                        // Cargar servicio y mascota
+                        if (reserva.ServicioId > 0)
+                        {
+                            reserva.Servicio = await ObtenerServicioPorIdAsync(reserva.ServicioId);
+                        }
+
+                        if (reserva.MascotaId > 0)
+                        {
+                            reserva.Mascota = await ObtenerMascotaPorIdAsync(reserva.MascotaId);
+                        }
+
+                        reservasAsignadas.Add(reserva);
+                    }
+                }
+
+                Console.WriteLine($"✅ Total citas asignadas encontradas: {reservasAsignadas.Count}");
+                return reservasAsignadas;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error al obtener citas asignadas: {ex.Message}");
                 return new List<Reserva>();
+            }
+        }
+
+        public async Task<Usuario> ObtenerUsuarioPorIdAsync(int usuarioId)
+        {
+            try
+            {
+                var url = $"{_supabaseUrl}/usuario?id=eq.{usuarioId}";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(json) || json == "[]")
+                    return null;
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var usuarios = JsonSerializer.Deserialize<List<Usuario>>(json, options);
+
+                return usuarios?.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error al obtener usuario por ID: {ex.Message}");
+                return null;
             }
         }
 
@@ -1070,19 +1185,41 @@ namespace KynosPetClub.Services
         {
             try
             {
-                var url = $"{_supabaseUrl}/usuario?rol_id=eq.3"; // Rol 3 = Funcionario
+                Console.WriteLine("🔍 Obteniendo funcionarios (rol 3)...");
+
+                var url = $"{_supabaseUrl}/usuario?rol_id=eq.3&order=nombre.asc";
+                Console.WriteLine($"🔗 URL: {url}");
+
                 var response = await _httpClient.GetAsync(url);
 
-                if (!response.IsSuccessStatusCode) return new List<Usuario>();
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"❌ Error HTTP: {response.StatusCode}");
+                    return new List<Usuario>();
+                }
 
                 var json = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<Usuario>>(json) ?? new List<Usuario>();
+                Console.WriteLine($"📄 JSON funcionarios: {json}");
+
+                if (string.IsNullOrEmpty(json) || json == "[]")
+                {
+                    Console.WriteLine("📄 No hay funcionarios");
+                    return new List<Usuario>();
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var funcionarios = JsonSerializer.Deserialize<List<Usuario>>(json, options);
+
+                Console.WriteLine($"✅ Funcionarios cargados: {funcionarios?.Count ?? 0}");
+                return funcionarios ?? new List<Usuario>();
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error al obtener funcionarios: {ex.Message}");
                 return new List<Usuario>();
             }
         }
+
 
         public void DebugHeaders()
         {
