@@ -11,7 +11,9 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
     private readonly Usuario _usuario;
     private string _filtroActual = "Todos";
 
+    // 🔧 DOS COLECCIONES: Una para todas las reservas y otra para mostrar
     public ObservableCollection<HistorialViewModel> ReservasHistorial { get; set; } = new();
+    private List<HistorialViewModel> _todasLasReservas = new List<HistorialViewModel>(); // Lista completa
 
     // Propiedad para binding del Usuario al BottomNavBar
     public Usuario Usuario => _usuario;
@@ -34,6 +36,8 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
     {
         try
         {
+            Console.WriteLine("🔄 Iniciando carga de historial...");
+
             // Mostrar indicador de carga
             loadingSection.IsVisible = true;
             loadingIndicator.IsVisible = true;
@@ -84,21 +88,21 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
                 };
 
                 historialViewModels.Add(viewModel);
+                Console.WriteLine($"➕ Agregando: {viewModel.ServicioNombre} - {viewModel.Estado}");
             }
 
-            // Actualizar la colección
-            ReservasHistorial.Clear();
-            foreach (var reserva in historialViewModels)
-            {
-                ReservasHistorial.Add(reserva);
-            }
+            // 🔧 GUARDAR TODAS LAS RESERVAS EN LA LISTA COMPLETA
+            _todasLasReservas = historialViewModels;
 
-            // Aplicar filtro actual
+            // Aplicar filtro actual (esto actualizará ReservasHistorial)
             AplicarFiltro(_filtroActual);
+
+            Console.WriteLine($"✅ Carga completada. Total en historial: {_todasLasReservas.Count}");
 
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"❌ Error al cargar historial: {ex.Message}");
             await DisplayAlert("Error", $"Error al cargar historial: {ex.Message}", "OK");
         }
         finally
@@ -126,6 +130,8 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
         {
             if (sender is Button button)
             {
+                Console.WriteLine($"🔍 Botón presionado: {button.Text}");
+
                 // Obtener filtro del texto del botón
                 string filtro = button.Text switch
                 {
@@ -134,6 +140,8 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
                     "❌ Cancelados" => "Cancelado",
                     _ => "Todos"
                 };
+
+                Console.WriteLine($"🎯 Filtro seleccionado: {filtro}");
 
                 _filtroActual = filtro;
 
@@ -146,6 +154,7 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"❌ Error al aplicar filtro: {ex.Message}");
             await DisplayAlert("Error", $"Error al aplicar filtro: {ex.Message}", "OK");
         }
     }
@@ -165,31 +174,48 @@ public partial class vHistorial : ContentPage, INotifyPropertyChanged
         // Resaltar botón seleccionado
         botonSeleccionado.BackgroundColor = Color.FromArgb("#4B8A8B");
         botonSeleccionado.TextColor = Colors.White;
+
+        Console.WriteLine($"🎨 Estilos actualizados. Botón seleccionado: {botonSeleccionado.Text}");
     }
 
     private void AplicarFiltro(string filtro)
     {
         try
         {
-            var todasLasReservas = ReservasHistorial.ToList();
+            Console.WriteLine($"🔍 Aplicando filtro: {filtro}");
+            Console.WriteLine($"📊 Total reservas disponibles: {_todasLasReservas.Count}");
+
+            // 🔧 FILTRAR DESDE LA LISTA COMPLETA
             var reservasFiltradas = filtro switch
             {
-                "Completado" => todasLasReservas.Where(r => r.Estado == "Completado"),
-                "Cancelado" => todasLasReservas.Where(r => r.Estado == "Cancelado"),
-                _ => todasLasReservas
+                "Completado" => _todasLasReservas.Where(r => r.Estado == "Completado").ToList(),
+                "Cancelado" => _todasLasReservas.Where(r => r.Estado == "Cancelado").ToList(),
+                _ => _todasLasReservas.ToList() // "Todos"
             };
 
-            // Mostrar mensaje si no hay resultados
+            Console.WriteLine($"📋 Reservas después del filtro: {reservasFiltradas.Count}");
+
+            // 🔧 ACTUALIZAR LA COLECCIÓN OBSERVABLE
+            ReservasHistorial.Clear();
+            foreach (var reserva in reservasFiltradas)
+            {
+                ReservasHistorial.Add(reserva);
+                Console.WriteLine($"➕ Mostrando: {reserva.ServicioNombre} - {reserva.Estado}");
+            }
+
+            // Mostrar/ocultar elementos según resultados
             bool hayResultados = reservasFiltradas.Any();
             emptyStateLayout.IsVisible = !hayResultados;
             cvHistorial.IsVisible = hayResultados;
 
-            Console.WriteLine($"🔍 Filtro aplicado: {filtro}");
-            Console.WriteLine($"📊 Resultados: {reservasFiltradas.Count()}");
+            Console.WriteLine($"✅ Filtro aplicado exitosamente");
+            Console.WriteLine($"📊 Resultados mostrados: {ReservasHistorial.Count}");
+            Console.WriteLine($"👁️ Vista vacía visible: {!hayResultados}");
+
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error aplicando filtro: {ex.Message}");
+            Console.WriteLine($"❌ Error aplicando filtro: {ex.Message}");
         }
     }
 

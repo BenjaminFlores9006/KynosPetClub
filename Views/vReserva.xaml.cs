@@ -159,6 +159,19 @@ public partial class vReserva : ContentPage, INotifyPropertyChanged
         };
     }
 
+    // MÉTODO NUEVO: Botón Nueva Reserva
+    private async void OnNuevaReservaClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            await Navigation.PushAsync(new vHacerReserva(_usuario));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Error al navegar: {ex.Message}", "OK");
+        }
+    }
+
     private async void OnVerDetallesClicked(object sender, EventArgs e)
     {
         try

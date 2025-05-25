@@ -25,7 +25,8 @@
                     <Button Text="Seguimiento"
                             BackgroundColor="#F7F7F7"
                             TextColor="Black"
-                            CornerRadius="10"/>
+                            CornerRadius="10"
+                            Clicked="btnAccesoRapidoSeguimiento_Clicked"/>
                     <Button Text="Planes"
                             BackgroundColor="#F7F7F7"
                             TextColor="Black"

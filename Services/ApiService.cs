@@ -1054,6 +1054,8 @@ namespace KynosPetClub.Services
             }
         }
 
+        // 🔧 REEMPLAZA el método ObtenerCitasAsignadasAsync en tu ApiService.cs
+
         public async Task<List<Reserva>> ObtenerCitasAsignadasAsync(int funcionarioId)
         {
             try
@@ -1071,7 +1073,7 @@ namespace KynosPetClub.Services
                 var nombreFuncionario = $"{funcionario.nombre} {funcionario.apellido}";
                 Console.WriteLine($"👤 Buscando citas asignadas a: {nombreFuncionario}");
 
-                // Obtener todas las reservas "En curso"
+                // Obtener SOLO reservas "En curso"
                 var url = $"{_supabaseUrl}/reserva?estado=eq.En%20curso&order=fecha_servicio.asc";
                 Console.WriteLine($"🔗 URL: {url}");
 
@@ -1084,7 +1086,7 @@ namespace KynosPetClub.Services
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"📄 JSON reservas: {json}");
+                Console.WriteLine($"📄 JSON reservas En curso: {json}");
 
                 if (string.IsNullOrEmpty(json) || json == "[]")
                 {
@@ -1093,39 +1095,52 @@ namespace KynosPetClub.Services
                 }
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var todasReservas = JsonSerializer.Deserialize<List<Reserva>>(json, options);
+                var todasReservas = JsonSerializer.Deserialize<List<Reserva>>(json, options) ?? new List<Reserva>();
+
+                Console.WriteLine($"📊 Total reservas En curso encontradas: {todasReservas.Count}");
 
                 // Filtrar las que tienen asignado este funcionario en los comentarios
                 var reservasAsignadas = new List<Reserva>();
 
-                foreach (var reserva in todasReservas ?? new List<Reserva>())
+                foreach (var reserva in todasReservas)
                 {
+                    Console.WriteLine($"🔍 Revisando reserva ID {reserva.Id} - Comentarios: {reserva.Comentarios?.Substring(0, Math.Min(50, reserva.Comentarios?.Length ?? 0))}...");
+
                     if (!string.IsNullOrEmpty(reserva.Comentarios) &&
                         reserva.Comentarios.Contains($"FUNCIONARIO ASIGNADO: {nombreFuncionario}"))
                     {
-                        Console.WriteLine($"✅ Encontrada cita asignada: Reserva ID {reserva.Id}");
+                        Console.WriteLine($"✅ ¡Encontrada cita asignada! Reserva ID {reserva.Id}");
 
                         // Cargar servicio y mascota
                         if (reserva.ServicioId > 0)
                         {
                             reserva.Servicio = await ObtenerServicioPorIdAsync(reserva.ServicioId);
+                            Console.WriteLine($"   🏥 Servicio: {reserva.Servicio?.Nombre}");
                         }
 
                         if (reserva.MascotaId > 0)
                         {
                             reserva.Mascota = await ObtenerMascotaPorIdAsync(reserva.MascotaId);
+                            Console.WriteLine($"   🐾 Mascota: {reserva.Mascota?.Nombre}");
                         }
 
                         reservasAsignadas.Add(reserva);
                     }
+                    else
+                    {
+                        Console.WriteLine($"❌ Reserva ID {reserva.Id} NO asignada a {nombreFuncionario}");
+                    }
                 }
 
-                Console.WriteLine($"✅ Total citas asignadas encontradas: {reservasAsignadas.Count}");
-                return reservasAsignadas;
+                Console.WriteLine($"✅ Total citas asignadas al funcionario: {reservasAsignadas.Count}");
+
+                // Ordenar por fecha (más próximas primero)
+                return reservasAsignadas.OrderBy(r => r.FechaServicio).ToList();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"❌ Error al obtener citas asignadas: {ex.Message}");
+                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
                 return new List<Reserva>();
             }
         }

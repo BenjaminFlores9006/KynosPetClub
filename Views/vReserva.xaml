@@ -12,7 +12,7 @@
             <VerticalStackLayout Padding="20" Spacing="20">
 
                 <!-- Header -->
-                <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="15">
                     <StackLayout Orientation="Horizontal" 
                                  HorizontalOptions="Center"
                                  Spacing="10">
@@ -29,6 +29,19 @@
                            FontSize="14"
                            TextColor="#666"
                            HorizontalTextAlignment="Center" />
+
+                    <!-- Botón Nueva Reserva -->
+                    <Button Text="➕ Nueva Reserva"
+                            BackgroundColor="#4CAF50"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="50"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            WidthRequest="200"
+                            Margin="0,5,0,0"
+                            Clicked="OnNuevaReservaClicked" />
                 </VerticalStackLayout>
 
                 <!-- Indicador de carga -->

@@ -21,7 +21,6 @@
                        TextChanged="searchBar_TextChanged"
                        PlaceholderColor="Gray"/>
 
-            <!-- Contador de reservas -->
             <Label x:Name="lblContador"
                    Text="Cargando reservas..."
                    FontSize="14"
@@ -41,38 +40,46 @@
                                        HasShadow="True"
                                        BackgroundColor="White">
 
-                                    <StackLayout Spacing="15">
+                                    <StackLayout Spacing="20">
                                         <!-- Header de la reserva -->
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                            <StackLayout Grid.Column="0" Spacing="4">
+                                            <StackLayout Grid.Column="0" Spacing="2">
                                                 <Label Text="{Binding ServicioNombre}"
                                                        FontSize="18"
                                                        FontAttributes="Bold"
-                                                       TextColor="#2C3E50"/>
+                                                       TextColor="#2C3E50"
+                                                       Margin="0,0,0,2"/>
                                                 <Label Text="{Binding ClienteNombre}"
                                                        FontSize="14"
-                                                       TextColor="#7F8C8D"/>
+                                                       TextColor="#7F8C8D"
+                                                       Margin="0,0,0,2"/>
                                                 <Label Text="{Binding MascotaNombre}"
                                                        FontSize="14"
-                                                       TextColor="#95A5A6"/>
+                                                       TextColor="#95A5A6"
+                                                       Margin="0,0,0,2"/>
                                             </StackLayout>
 
-                                            <!-- Badge del estado -->
                                             <Frame Grid.Column="1"
                                                    BackgroundColor="{Binding EstadoColor}"
-                                                   Padding="8,4"
+                                                   Padding="6,2"
                                                    CornerRadius="12"
-                                                   HasShadow="False">
+                                                   HasShadow="False"
+                                                   VerticalOptions="Start">
                                                 <Label Text="{Binding Estado}"
                                                        FontSize="12"
                                                        FontAttributes="Bold"
                                                        TextColor="White"
-                                                       HorizontalTextAlignment="Center"/>
+                                                       HorizontalTextAlignment="Center"
+                                                       VerticalTextAlignment="Center"/>
                                             </Frame>
                                         </Grid>
 
                                         <!-- Información de la cita -->
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" RowSpacing="5">
+                                        <Grid ColumnDefinitions="Auto,*" 
+                                              RowDefinitions="Auto,Auto,Auto"
+                                              ColumnSpacing="10" 
+                                              RowSpacing="5">
+
                                             <Label Grid.Row="0" Grid.Column="0" Text="📅" FontSize="14"/>
                                             <Label Grid.Row="0" Grid.Column="1" 
                                                    Text="{Binding FechaServicioTexto}"
@@ -92,7 +99,8 @@
                                                    TextColor="Gray"/>
                                         </Grid>
 
-                                        <!-- Comentarios (si existen) -->
+
+                                        <!-- Comentarios del cliente -->
                                         <Frame IsVisible="{Binding TieneComentarios}"
                                                BackgroundColor="#FFF3E0"
                                                CornerRadius="8"
@@ -105,7 +113,8 @@
                                                        TextColor="#F57C00"/>
                                                 <Label Text="{Binding Comentarios}"
                                                        FontSize="12"
-                                                       TextColor="#F57C00"/>
+                                                       TextColor="#F57C00"
+                                                       LineBreakMode="TailTruncation"/>
                                             </StackLayout>
                                         </Frame>
 
@@ -120,13 +129,11 @@
                                                        FontAttributes="Bold"
                                                        TextColor="#2E7D32"/>
 
-                                                <!-- Mostrar funcionario asignado -->
                                                 <Label IsVisible="{Binding TieneFuncionarioAsignado}"
                                                        Text="{Binding FuncionarioAsignadoTexto}"
                                                        FontSize="12"
                                                        TextColor="#2E7D32"/>
 
-                                                <!-- Selector de funcionario (solo para pendientes) -->
                                                 <StackLayout IsVisible="{Binding PuedeAsignar}">
                                                     <Picker ItemsSource="{Binding Source={x:Reference Name=cvReservas}, Path=BindingContext.FuncionariosDisponibles}"
                                                             ItemDisplayBinding="{Binding NombreCompleto}"
@@ -154,7 +161,7 @@
             </StackLayout>
         </ScrollView>
 
-        <!-- Loading indicator -->
+        <!-- Cargando -->
         <ActivityIndicator x:Name="loadingIndicator"
                           Grid.Row="1"
                           IsVisible="False"
@@ -162,7 +169,7 @@
                           Color="#3498DB"
                           Scale="1.5"/>
 
-        <!-- Footer con botón volver -->
+        <!-- Botón volver -->
         <Button x:Name="btnVolver" 
                 Grid.Row="2"
                 Text="🔙 Volver al Perfil"

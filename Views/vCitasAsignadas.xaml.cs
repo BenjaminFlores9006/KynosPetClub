@@ -56,11 +56,18 @@ public partial class vCitasAsignadas : ContentPage, INotifyPropertyChanged
 
             Console.WriteLine($"📋 Citas encontradas: {citasAsignadas.Count}");
 
+            // Obtener información de clientes para mostrar
+            var todosUsuarios = await _apiService.ObtenerTodosUsuariosAsync();
+
             Citas.Clear();
 
             foreach (var cita in citasAsignadas)
             {
                 Console.WriteLine($"➕ Agregando cita: {cita.Servicio?.Nombre} - {cita.Estado}");
+
+                // Buscar el cliente
+                var cliente = todosUsuarios.FirstOrDefault(u => u.Id == cita.UsuarioId);
+                var nombreCliente = cliente != null ? $"{cliente.nombre} {cliente.apellido}" : "Cliente desconocido";
 
                 Citas.Add(new CitaAsignadaViewModel
                 {
@@ -71,15 +78,16 @@ public partial class vCitasAsignadas : ContentPage, INotifyPropertyChanged
                     Mascota = cita.Mascota,
                     Estado = cita.Estado,
                     EstadoColor = ObtenerColorEstado(cita.Estado),
-                    PuedeCompletar = cita.Estado == "En curso"
+                    PuedeCompletar = cita.Estado == "En curso", // Solo si está en curso
+                    ClienteNombre = nombreCliente
                 });
             }
 
+            ActualizarContador();
+
             if (!Citas.Any())
             {
-                await DisplayAlert("Información",
-                    "📋 No tienes citas asignadas actualmente.\n\n" +
-                    "Las citas aparecerán aquí cuando un administrador te las asigne.", "OK");
+                Console.WriteLine("📋 No hay citas asignadas");
             }
             else
             {
@@ -89,6 +97,7 @@ public partial class vCitasAsignadas : ContentPage, INotifyPropertyChanged
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Error al cargar citas: {ex.Message}");
+            Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
             await DisplayAlert("Error", $"❌ Error al cargar citas: {ex.Message}", "OK");
         }
         finally
@@ -97,14 +106,23 @@ public partial class vCitasAsignadas : ContentPage, INotifyPropertyChanged
         }
     }
 
+    private void ActualizarContador()
+    {
+        if (lblContador != null)
+        {
+            var totalCitas = Citas.Count;
+            lblContador.Text = $"📋 {totalCitas} cita{(totalCitas != 1 ? "s" : "")} asignada{(totalCitas != 1 ? "s" : "")}";
+        }
+    }
+
     private Color ObtenerColorEstado(string estado)
     {
         return estado switch
         {
-            "En curso" => Colors.Blue,
-            "Completado" => Colors.Green,
-            "Cancelado" => Colors.Red,
-            _ => Colors.Orange
+            "En curso" => Color.FromArgb("#2196F3"),    // Azul
+            "Completado" => Color.FromArgb("#4CAF50"),   // Verde
+            "Cancelado" => Color.FromArgb("#F44336"),    // Rojo
+            _ => Color.FromArgb("#FF9800")               // Naranja
         };
     }
 
@@ -114,47 +132,58 @@ public partial class vCitasAsignadas : ContentPage, INotifyPropertyChanged
         {
             try
             {
-                bool confirmar = await DisplayAlert("Confirmar",
-                    $"¿Marcar como completada la cita?\n\n" +
+                bool confirmar = await DisplayAlert("Confirmar Completado",
+                    $"¿Marcar como completada esta cita?\n\n" +
                     $"🏥 Servicio: {vm.Servicio?.Nombre}\n" +
                     $"🐾 Mascota: {vm.Mascota?.Nombre}\n" +
-                    $"📅 Fecha: {vm.FechaServicio:dd/MM/yyyy HH:mm}",
+                    $"👤 Cliente: {vm.ClienteNombre}\n" +
+                    $"📅 Fecha: {vm.FechaServicio:dd/MM/yyyy HH:mm}\n\n" +
+                    $"Esta acción no se puede deshacer.",
                     "Sí, completar", "Cancelar");
 
                 if (!confirmar) return;
 
                 IsBusy = true;
+                Console.WriteLine($"🔄 Completando cita ID: {vm.Id}");
 
                 // Actualizar estado de la reserva
                 vm.Reserva.Estado = "Completado";
 
                 // Agregar comentario de completado
-                var comentarioCompletar = $"\n\n✅ COMPLETADO por {_funcionario.nombre} {_funcionario.apellido} el {DateTime.Now:dd/MM/yyyy HH:mm}";
+                var comentarioCompletar = $"\n\n✅ COMPLETADO por {_funcionario.nombre} {_funcionario.apellido}" +
+                                        $"\n📅 Fecha de completado: {DateTime.Now:dd/MM/yyyy HH:mm}" +
+                                        $"\n💼 Estado cambiado de 'En curso' a 'Completado'";
+
                 vm.Reserva.Comentarios = (vm.Reserva.Comentarios ?? "") + comentarioCompletar;
+
+                Console.WriteLine($"📝 Actualizando reserva con comentario de completado");
 
                 var resultado = await _apiService.ActualizarReservaAsync(vm.Reserva);
 
                 if (resultado)
                 {
-                    // Actualizar ViewModel
-                    vm.Estado = "Completado";
-                    vm.EstadoColor = Colors.Green;
-                    vm.PuedeCompletar = false;
+                    Console.WriteLine("✅ Cita completada exitosamente");
 
-                    // Forzar actualización de la UI
-                    OnPropertyChanged(nameof(Citas));
+                    // REMOVER la cita de la lista ya que ahora está completada
+                    Citas.Remove(vm);
 
-                    await DisplayAlert("Éxito",
-                        "✅ Cita completada exitosamente\n\n" +
-                        "El cliente podrá ver que el servicio fue completado.", "OK");
+                    // Actualizar contador
+                    ActualizarContador();
+
+                    await DisplayAlert("¡Éxito!",
+                        $"✅ Cita completada exitosamente\n\n" +
+                        $"🎯 El cliente {vm.ClienteNombre} será notificado de que el servicio fue completado.\n\n" +
+                        $"📋 La cita ha sido removida de tu lista de pendientes.", "OK");
                 }
                 else
                 {
+                    Console.WriteLine("❌ Error al actualizar la reserva");
                     await DisplayAlert("Error", "❌ No se pudo completar la cita. Intenta de nuevo.", "OK");
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Error al completar cita: {ex.Message}");
                 await DisplayAlert("Error", $"❌ Error al completar cita: {ex.Message}", "OK");
             }
             finally
@@ -177,7 +206,7 @@ public partial class vCitasAsignadas : ContentPage, INotifyPropertyChanged
     }
 }
 
-// ViewModel mejorado para citas asignadas
+// ViewModel simplificado para citas asignadas
 public class CitaAsignadaViewModel : INotifyPropertyChanged
 {
     private string _estado;
@@ -189,6 +218,7 @@ public class CitaAsignadaViewModel : INotifyPropertyChanged
     public Reserva Reserva { get; set; }
     public Servicio Servicio { get; set; }
     public Mascota Mascota { get; set; }
+    public string ClienteNombre { get; set; }
 
     public string Estado
     {

@@ -19,8 +19,7 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
     public List<string> MetodosPago { get; } = new List<string>
     {
         "Transferencia bancaria",
-        "Depósito bancario",
-        "Efectivo en sede"
+        "Depósito bancario"
     };
 
     // Propiedad para binding del Usuario al BottomNavBar
