@@ -1272,5 +1272,54 @@ namespace KynosPetClub.Services
             }
         }
 
+        // Agregar este método a tu clase ApiService existente:
+
+        public async Task<Usuario?> ObtenerUsuarioPorEmailAsync(string email)
+        {
+            try
+            {
+                Console.WriteLine($"🔍 Buscando usuario por email: {email}");
+
+                var url = $"{_supabaseUrl}/usuario?correo=eq.{Uri.EscapeDataString(email)}";
+                Console.WriteLine($"🔗 URL: {url}");
+
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Error HTTP: {response.StatusCode} - {errorContent}");
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"📄 Respuesta recibida: {json}");
+
+                if (string.IsNullOrEmpty(json) || json == "[]")
+                {
+                    Console.WriteLine("📄 No se encontró usuario con ese email");
+                    return null;
+                }
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var usuarios = JsonSerializer.Deserialize<List<Usuario>>(json, options);
+
+                var usuario = usuarios?.FirstOrDefault();
+
+                if (usuario != null)
+                {
+                    Console.WriteLine($"✅ Usuario encontrado: {usuario.nombre} {usuario.apellido}");
+                }
+
+                return usuario;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error obteniendo usuario por email: {ex.Message}");
+                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
+                return null;
+            }
+        }
+
     }
 }

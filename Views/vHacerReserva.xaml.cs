@@ -286,6 +286,7 @@ public partial class vHacerReserva : ContentPage, INotifyPropertyChanged
                         "Entendido");
 
                     LimpiarFormulario();
+                    await Navigation.PushAsync(new vReserva(_usuario));
                 }
                 else
                 {

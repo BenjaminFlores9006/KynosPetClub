@@ -67,6 +67,10 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.70" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
+		<!-- En tu archivo .csproj, agrega estos PackageReference -->
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.70" />
+		<PackageReference Include="supabase-csharp" Version="0.16.2" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.11.0" />
 	</ItemGroup>
 
 	<ItemGroup>

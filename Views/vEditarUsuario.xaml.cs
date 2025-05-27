@@ -68,7 +68,7 @@ public partial class vEditarUsuario : ContentPage
             if (resultado)
             {
                 await DisplayAlert("Éxito", "Perfil actualizado correctamente", "OK");
-                await Navigation.PopAsync(); // Volver a la página anterior
+                await Navigation.PushAsync(new vPerfil(_usuario));
             }
             else
             {

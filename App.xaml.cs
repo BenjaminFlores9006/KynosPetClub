@@ -4,6 +4,8 @@ namespace KynosPetClub
 {
     public partial class App : Application
     {
+        public static NavigationPage MainNavigationPage { get; private set; }
+
         public App()
         {
             InitializeComponent();
@@ -11,8 +13,9 @@ namespace KynosPetClub
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            var loginPage = new NavigationPage(new vLogIn());
-            return new Window(loginPage);
+            var loginPage = new vLogIn();
+            MainNavigationPage = new NavigationPage(loginPage);
+            return new Window(MainNavigationPage);
         }
     }
 }

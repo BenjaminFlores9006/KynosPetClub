@@ -172,7 +172,7 @@ public partial class vEditarMascota : ContentPage
             if (resultado)
             {
                 await DisplayAlert("Éxito", "Mascota actualizada correctamente", "OK");
-                await Navigation.PopAsync(); // Volver a la página anterior
+                await Navigation.PushAsync(new vPerfil(_usuario));
             }
             else
             {

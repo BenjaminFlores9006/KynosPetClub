@@ -1,4 +1,4 @@
-using KynosPetClub.Models;
+ï»¿using KynosPetClub.Models;
 using KynosPetClub.Services;
 
 namespace KynosPetClub.Views;
@@ -15,7 +15,7 @@ public partial class vAgregarMascota : ContentPage
         _apiService = new ApiService();
         _usuario = usuario;
 
-        // Establecer fecha por defecto (hace 1 año)
+        // Establecer fecha por defecto (hace 1 aÃ±o)
         dtpFechaNacimiento.Date = DateTime.Now.AddYears(-1);
     }
 
@@ -28,13 +28,13 @@ public partial class vAgregarMascota : ContentPage
                 "Cancelar",
                 null,
                 "Tomar foto",
-                "Elegir de galería");
+                "Elegir de galerÃ­a");
 
             if (accion == "Tomar foto")
             {
                 await TomarFotoConCamara();
             }
-            else if (accion == "Elegir de galería")
+            else if (accion == "Elegir de galerÃ­a")
             {
                 await ElegirFotoDeGaleria();
             }
@@ -59,7 +59,7 @@ public partial class vAgregarMascota : ContentPage
             }
             else
             {
-                await DisplayAlert("Error", "La cámara no está disponible", "OK");
+                await DisplayAlert("Error", "La cÃ¡mara no estÃ¡ disponible", "OK");
             }
         }
         catch (Exception ex)
@@ -143,8 +143,8 @@ public partial class vAgregarMascota : ContentPage
 
             if (resultado == "OK")
             {
-                await DisplayAlert("Éxito", "Mascota agregada correctamente", "OK");
-                await Navigation.PopAsync(); // Volver a la página anterior
+                await DisplayAlert("Ã‰xito", "Mascota agregada correctamente", "OK");
+                await Navigation.PushAsync(new vPerfil(_usuario));
             }
             else
             {
@@ -168,8 +168,8 @@ public partial class vAgregarMascota : ContentPage
     {
         bool confirmar = await DisplayAlert(
             "Confirmar",
-            "¿Deseas cancelar sin guardar?",
-            "Sí",
+            "Â¿Deseas cancelar sin guardar?",
+            "SÃ­",
             "No");
 
         if (confirmar)

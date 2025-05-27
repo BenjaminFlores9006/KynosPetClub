@@ -29,7 +29,7 @@
             <Frame BackgroundColor="#E8F5E8" 
                    CornerRadius="10" 
                    Padding="15" 
-                   HasShadow="False"
+                   HasShadow="false"
                    BorderColor="#C8E6C9">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="📋 Horarios de Atención" 
@@ -59,7 +59,7 @@
             <Frame BackgroundColor="#F8F9FA" 
                    CornerRadius="15" 
                    Padding="20" 
-                   HasShadow="True"
+                   HasShadow="true"
                    BorderColor="#E0E0E0">
 
                 <VerticalStackLayout Spacing="20">
@@ -73,7 +73,7 @@
                         <Frame BackgroundColor="White" 
                                CornerRadius="8" 
                                Padding="0" 
-                               HasShadow="False"
+                               HasShadow="false"
                                BorderColor="#DDD">
                             <Picker x:Name="pickerServicio" 
                                     Title="Selecciona un servicio"
@@ -93,7 +93,7 @@
                         <Frame BackgroundColor="White" 
                                CornerRadius="8" 
                                Padding="0" 
-                               HasShadow="False"
+                               HasShadow="false"
                                BorderColor="#DDD">
                             <Picker x:Name="pickerMascota" 
                                     Title="Selecciona tu mascota"
@@ -113,7 +113,7 @@
                         <Frame BackgroundColor="White" 
                                CornerRadius="8" 
                                Padding="10" 
-                               HasShadow="False"
+                               HasShadow="false"
                                BorderColor="#DDD">
                             <DatePicker x:Name="datePicker"
                                         BackgroundColor="Transparent"
@@ -138,7 +138,7 @@
                         <Frame BackgroundColor="White" 
                                CornerRadius="8" 
                                Padding="0" 
-                               HasShadow="False"
+                               HasShadow="false"
                                BorderColor="#DDD">
                             <Picker x:Name="pickerHora" 
                                     Title="Selecciona la hora"
@@ -158,7 +158,7 @@
                         <Frame BackgroundColor="White" 
                                CornerRadius="8" 
                                Padding="10" 
-                               HasShadow="False"
+                               HasShadow="false"
                                BorderColor="#DDD">
                             <Editor x:Name="editorObservaciones"
                                     Placeholder="Escribe cualquier observación adicional..."
@@ -183,7 +183,6 @@
                         HeightRequest="55"
                         FontAttributes="Bold"
                         FontSize="16"
-                        Shadow="{OnPlatform iOS='True', Default='False'}"
                         Clicked="btnGuardarReserva_Clicked" />
 
                 <Button x:Name="btnLimpiarFormulario"

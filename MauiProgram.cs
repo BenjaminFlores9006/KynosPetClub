@@ -23,6 +23,7 @@ namespace KynosPetClub
 
             // Configurar servicios
             builder.Services.AddSingleton<ApiService>();
+            builder.Services.AddSingleton<GoogleAuthService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

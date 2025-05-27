@@ -198,7 +198,7 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
                 if (actualizacionExitosa)
                 {
                     await DisplayAlert("✅ Éxito", "Plan adquirido correctamente", "OK");
-                    await Navigation.PopToRootAsync();
+                    await Navigation.PushAsync(new vPlanes(_usuario));
                     return;
                 }
                 else
@@ -270,7 +270,7 @@ public partial class vPagos : ContentPage, INotifyPropertyChanged
                     $"⏳ Nuestro equipo verificará el pago y te notificaremos cuando esté confirmado.",
                     "Perfecto");
 
-                await Navigation.PopToRootAsync();
+                await Navigation.PushAsync(new vReserva(_usuario));
             }
             else
             {
